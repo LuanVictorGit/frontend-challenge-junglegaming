@@ -86,6 +86,11 @@
   html {
     color-scheme: dark;
     -webkit-text-size-adjust: 100%;
+    /* Keyboard focus never lands under the mobile top bar or bottom navigation */
+    scroll-padding: 4rem 0 6rem;
+    @media (width >= 48rem) {
+      scroll-padding: 0;
+    }
   }
   body {
     @apply min-h-dvh bg-background font-sans text-foreground antialiased;

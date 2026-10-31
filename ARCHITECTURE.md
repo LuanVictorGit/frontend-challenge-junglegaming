@@ -112,7 +112,7 @@ Cliente (`src/lib/realtime.ts`): valida cada evento com zod; descarta `id` repet
 
 ## Acessibilidade
 
-Skip link; foco movido para o conteúdo a cada troca de rota; foco preso e devolvido em diálogos e drawers (Radix); labels, `aria-invalid` e `aria-describedby` em todos os campos; feedback de mutations e de tempo real via toasts e região `aria-live`; estados com texto além da cor (ex.: "Esgotada", "Favoritado"); contraste dos tokens ≥ 4,5:1; navegação por teclado; `prefers-reduced-motion` desliga animações e shimmer; sem overflow horizontal em 390, 768 e 1440 px.
+Skip link; foco movido para o conteúdo a cada troca de rota; foco preso e devolvido em diálogos e drawers (Radix); labels, `aria-invalid` e `aria-describedby` em todos os campos; feedback de mutations e de tempo real via toasts e região `aria-live`; estados com texto além da cor (ex.: "Esgotada", "Favoritado"); contraste dos tokens ≥ 4,5:1; navegação por teclado (fluxo principal coberto por um teste só com teclado; no mobile, `scroll-padding` impede o foco de ficar sob as barras fixas; painéis de abas com indicador de foco); `prefers-reduced-motion` desliga animações e shimmer; sem overflow horizontal em 390, 768 e 1440 px.
 
 ## Performance
 

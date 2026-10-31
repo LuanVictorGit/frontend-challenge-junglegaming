@@ -29,6 +29,61 @@ test('skip link, dialog focus trap/return and accessible form errors', async ({ 
   await expect(page.locator(`[id="${describedBy}"]`)).toHaveText('E-mail inválido')
 })
 
+test('the main flow works with the keyboard alone', async ({ page }) => {
+  await boot(page)
+  await page.goto('/')
+  await expect(page.getByTestId('nft-card')).toHaveCount(9)
+  // Card → detail with Enter; focus moves to the new page
+  await page.getByRole('link', { name: 'Emerald Ape #042', exact: true }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/nft\/emerald-ape-042/)
+  await expect(page.locator('main')).toBeFocused()
+  // Edition radio group and tabs with arrow keys; the focused tab panel shows a focus ring
+  const edition = page.locator('input[name=edition]:checked')
+  const before = await edition.getAttribute('value')
+  await edition.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('input[name=edition]:checked')).not.toHaveAttribute('value', before!)
+  await page.getByRole('tab', { selected: true }).focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tab', { selected: true })).toContainText('Avaliações')
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('tabpanel')).toBeFocused()
+  expect(await page.getByRole('tabpanel').evaluate((p) => getComputedStyle(p).outlineStyle)).not.toBe('none')
+  // Buy with Enter, then apply a coupon with Enter
+  await page.getByRole('button', { name: /^(COMPRAR|Comprar NFT)$/ }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/cart/)
+  await page.getByLabel('Código promocional').locator('visible=true').focus()
+  await page.keyboard.type('KURIO10')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Remover cupom KURIO10' }).locator('visible=true')).toBeVisible()
+  // Sort select (desktop) or the filter drawer (mobile), operated by keyboard
+  await page.goto('/')
+  if (isMobile(page)) {
+    const filters = page.locator('button[aria-label="Filtros e ordenação"]')
+    await filters.focus()
+    await page.keyboard.press('Enter')
+    const drawer = page.getByRole('dialog')
+    await expect(drawer).toBeVisible()
+    for (let i = 0; i < 12; i++) await page.keyboard.press('Tab')
+    expect(await drawer.evaluate((d) => d.contains(document.activeElement))).toBe(true)
+    await page.keyboard.press('Escape')
+    await expect(drawer).toBeHidden()
+    await expect(filters).toBeFocused()
+  } else {
+    const sort = page.getByRole('combobox', { name: 'Ordenar por' })
+    await sort.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('option', { name: 'Listados recentemente' })).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('option', { name: 'Menor preço' })).toBeFocused()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(/sort=price-asc/)
+    await expect(sort).toBeFocused()
+  }
+})
+
 // 12. Skeletons on slow loading, failure feedback and retry
 test('skeletons on slow network, then error feedback and recovery on retry', async ({ page }) => {
   await boot(page, { latency: [1500, 1500] })

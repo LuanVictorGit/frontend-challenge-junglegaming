@@ -90,7 +90,7 @@ Controle fino pelo console do navegador (o mesmo usado pelos testes): `window.__
 
 ## Testes
 
-`npm run test:e2e` executa 25 cenários × 2 viewports (Chromium 1440×900 e 390×844), cobrindo os 12 grupos pedidos no desafio, mais regressão visual de início, detalhe, carrinho e pagamento (baselines versionadas em `e2e/visual.spec.ts-snapshots/`, geradas em Windows; em outro SO rode `npm run test:e2e:update`). Cada teste usa um contexto isolado (banco simulado novo), latência controlada e, nos cenários sensíveis a tempo, o relógio do Playwright (`page.clock`). Eventos em tempo real passam pelo `socket.io-client` e as chamadas REST pelos handlers MSW.
+`npm run test:e2e` executa 26 cenários × 2 viewports (Chromium 1440×900 e 390×844), cobrindo os 12 grupos pedidos no desafio, mais regressão visual de início, detalhe, carrinho e pagamento (baselines versionadas em `e2e/visual.spec.ts-snapshots/`, geradas em Windows; em outro SO rode `npm run test:e2e:update`). Cada teste usa um contexto isolado (banco simulado novo), latência controlada e, nos cenários sensíveis a tempo, o relógio do Playwright (`page.clock`). Eventos em tempo real passam pelo `socket.io-client` e as chamadas REST pelos handlers MSW.
 
 ## Auditoria de performance
 
@@ -242,7 +242,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 - **Fidelidade ao Figma:** identidade em tokens ([`index.css`](src/index.css)) e componentes shadcn/ui adaptados. Desvios e substituições de assets estão em [`ARCHITECTURE.md`](ARCHITECTURE.md#decisões-de-ux-e-desvios-do-figma).
 - **Responsividade:** desktop, tablet e mobile (390, 768 e 1440 px), sem overflow horizontal.
 - **Skeletons com shimmer** ([`skeleton.tsx`](src/components/ui/skeleton.tsx)) no catálogo, no detalhe e no resumo do carrinho, com dimensões reservadas (CLS 0). O shimmer desliga com `prefers-reduced-motion`.
-- **Teclado e foco:** foco visível (`:focus-visible`), link "Pular para o conteúdo" e foco movido a cada troca de rota ([`__root.tsx`](src/routes/__root.tsx)). Em diálogos e gavetas, o foco fica preso e volta ao gatilho ao fechar (Radix), inclusive nos carregados sob demanda.
+- **Teclado e foco:** foco visível (`:focus-visible`), link "Pular para o conteúdo" e foco movido a cada troca de rota ([`__root.tsx`](src/routes/__root.tsx)). Em diálogos e gavetas, o foco fica preso e volta ao gatilho ao fechar (Radix), inclusive nos carregados sob demanda. Painéis de abas também mostram o indicador de foco. No mobile, o foco nunca fica escondido atrás das barras fixas (`scroll-padding`). O fluxo principal (card, edição, abas, compra, cupom, ordenação e gaveta de filtros) é coberto por um teste operado só pelo teclado.
 - **Semântica:** labels, `aria-invalid` e `aria-describedby` nos campos ([`Field.tsx`](src/components/common/Field.tsx)); `alt` nas imagens relevantes; estados com texto além da cor.
 - **Feedback acessível** de mutations e tempo real: região `aria-live` ([`announce.tsx`](src/lib/announce.tsx)) e toasts.
 
@@ -260,7 +260,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 | 8. Perfil, avatar, senha e carteiras | [`account.spec.ts`](e2e/account.spec.ts) |
 | 9. Preço/disponibilidade via Socket.IO no checkout | [`realtime.spec.ts`](e2e/realtime.spec.ts) |
 | 10. Eventos duplicados/antigos, queda e pedido pendente | [`realtime.spec.ts`](e2e/realtime.spec.ts) |
-| 11. Teclado, foco de diálogos e validação | [`a11y-loading.spec.ts`](e2e/a11y-loading.spec.ts) |
+| 11. Teclado, foco de diálogos e validação (inclui o fluxo principal operado só pelo teclado) | [`a11y-loading.spec.ts`](e2e/a11y-loading.spec.ts) |
 | 12. Skeletons, falha e nova tentativa | [`a11y-loading.spec.ts`](e2e/a11y-loading.spec.ts) |
 | Regressão visual (início, detalhe, carrinho e pagamento) | [`visual.spec.ts`](e2e/visual.spec.ts), com baselines versionadas |
 
@@ -283,7 +283,7 @@ Condições de execução:
 - **Compra:** só é confirmada pela resposta da simulação (`settle`).
 - **Dados entre usuários:** não há exposição (autorização no servidor, cache por usuário e socket por sessão).
 - **Eventos:** sempre passam pelo `socket.io-client`.
-- **Testes:** 50 testes E2E executáveis.
+- **Testes:** 52 testes E2E executáveis.
 
 ### 12. Entrega
 
