@@ -190,7 +190,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
               ))}
             </div>
             {desktop && (
-              <Suspense fallback={<div aria-hidden="true" className="h-8 w-[210px]" />}>
+              <Suspense fallback={<div aria-hidden="true" className="h-9 w-[210px]" />}>
                 <SortSelect value={params.sort} set={set} />
               </Suspense>
             )}
