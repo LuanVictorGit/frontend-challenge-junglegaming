@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { NftImage } from '@/components/common/NftImage'
 import { Button } from '@/components/ui/button'
+import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
 // Editorial hero slides (marketing content, not catalog data).
@@ -34,10 +35,13 @@ export function Hero() {
   const go = (n: number) => (setI(n), setMoved(true))
   const s = SLIDES[i]
   const fx = moved ? 'animate-in fade-in-0 duration-500 ease-spring' : ''
+  // Only the visible layout is rendered, so the hidden one never downloads its (eager) LCP image.
+  const desktop = useMedia('(min-width: 768px)')
   return (
     <section aria-roledescription="carrossel" aria-label="Destaques da Kurio" className="container-k">
       {/* Desktop (Figma: Desktop / Início) */}
-      <div className="hidden grid-cols-[1fr_450px] items-center gap-10 py-12 md:grid">
+      {desktop ? (
+      <div className="grid grid-cols-[1fr_450px] items-center gap-10 py-12">
         <div className="relative flex h-full flex-col justify-center lg:pl-10">
           <p className="text-base">Bem-vindo à Kurio</p>
           <h1 key={i} className={`mt-5 max-w-[600px] text-[40px] leading-[1.45] font-bold tracking-wide uppercase lg:text-[48px] ${fx} slide-in-from-left-2`}>{s.title}</h1>
@@ -53,8 +57,9 @@ export function Hero() {
           <NftImage key={i} image={s.image} alt={s.alt} sizes="450px" priority={i === 0} className={`${fx} zoom-in-[1.04]`} />
         </div>
       </div>
-      {/* Mobile (Figma: Mobile / Início) */}
-      <div className="relative mt-4 overflow-hidden rounded-2xl bg-[radial-gradient(120%_120%_at_30%_40%,#7a4f2d_0%,#4a2e1b_45%,#2a1810_100%)] p-4 md:hidden">
+      ) : (
+      /* Mobile (Figma: Mobile / Início) */
+      <div className="relative mt-4 overflow-hidden rounded-2xl bg-[radial-gradient(120%_120%_at_30%_40%,#7a4f2d_0%,#4a2e1b_45%,#2a1810_100%)] p-4">
         <div className="grid grid-cols-[1fr_42%] gap-3">
           <div>
             <p className="text-[11px]">Bem-vindo à Kurio</p>
@@ -71,6 +76,7 @@ export function Hero() {
         </div>
         <Dots i={i} set={go} className="mt-3 justify-center" />
       </div>
+      )}
     </section>
   )
 }

@@ -1,6 +1,9 @@
 // Typed REST/realtime contracts shared by the client (parsing) and the mock backend (validation).
 import { z } from 'zod'
 
+// No eval-based JIT: CSP-safe (script-src 'self') and cheaper for these small payloads.
+z.config({ jitless: true })
+
 /* ---------- primitives ---------- */
 export const EthAmount = z.string().regex(/^\d+(\.\d{1,18})?$/, 'Valor em ETH inválido')
 export const Network = z.enum(['ethereum', 'polygon', 'solana'])

@@ -48,7 +48,7 @@ function Root() {
         Pular para o conteúdo
       </a>
       <Header />
-      <main id="main" ref={main} tabIndex={-1} className="outline-none">
+      <main id="main" ref={main} tabIndex={-1} className="min-h-dvh outline-none">
         <div key={pathname} className={animate ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-spring' : undefined}>
           <Outlet />
         </div>

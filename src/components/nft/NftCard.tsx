@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { Heart, Search, ShoppingCart } from 'lucide-react'
 import type { NftSummary } from '@/api/contracts'
 import { useAddToCart, useFavorites, useToggleFavorite } from '@/api/queries'
@@ -11,14 +11,13 @@ import { cn } from '@/lib/utils'
 /** Favorite toggle shared by cards and the detail page (guests are sent to login and back). */
 export function useFavoriteToggle(nft: Pick<NftSummary, 'id' | 'name'>) {
   const s = useSession()
-  const loc = useLocation()
-  const navigate = useNavigate()
+  const router = useRouter()
   const favs = useFavorites()
   const toggle = useToggleFavorite()
   const on = !!favs.data?.ids.includes(nft.id)
   return {
     on,
-    toggle: () => (s ? toggle.mutate({ id: nft.id, on: !on, name: nft.name }) : navigate({ to: '/login', search: { redirect: loc.href } })),
+    toggle: () => (s ? toggle.mutate({ id: nft.id, on: !on, name: nft.name }) : router.navigate({ to: '/login', search: { redirect: router.state.location.href } })),
   }
 }
 
