@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/roboto-mono/index.css';
+
+/* Kurio design tokens (sampled from the Figma file) */
+:root {
+  --radius: 0.5rem;
+  --background: #160c0a;
+  --foreground: #f6f1ed;
+  --card: #241613;
+  --card-foreground: #f6f1ed;
+  --tile: #1e120f;
+  --popover: #241613;
+  --popover-foreground: #f6f1ed;
+  --primary: #d18a4c;
+  --primary-foreground: #1b0f09;
+  --secondary: #2e1e18;
+  --secondary-foreground: #f6f1ed;
+  --muted: #2a1a15;
+  --muted-foreground: #b39478;
+  --sand: #e2c6a4;
+  --accent: #33221b;
+  --accent-foreground: #f6f1ed;
+  --destructive: #ef6a5b;
+  --success: #8fd19e;
+  --border: #3b2a22;
+  --input: #3b2a22;
+  --ring: #d18a4c;
+}
+
+@theme inline {
+  --font-sans: 'Roboto Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: 'Roboto Mono Variable', ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-tile: var(--tile);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-sand: var(--sand);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+    overflow-x: clip;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Centered 1200px content column used by every page */
+@utility container-k {
+  width: 100%;
+  max-width: calc(1200px + 2rem);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
