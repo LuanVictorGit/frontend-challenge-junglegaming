@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-const WIDTHS = [320, 640, 960]
+const WIDTHS = [320, 480, 640, 960]
 // Only known artwork keys are rendered (the API returns a key, never an arbitrary URL).
 const src = (key: string, w: number) => `/images/nft/${/^[a-z]+$/.test(key) ? key : 'emerald'}-${w}.webp`
 
