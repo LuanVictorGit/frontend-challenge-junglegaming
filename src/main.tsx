@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { startTransition, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from '@tanstack/react-router'
@@ -13,10 +13,14 @@ if (mocksEnabled)
     .catch((e) => console.error('[mocks] failed to start', e))
     .finally(markBackendReady)
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
+// Transition: the initial render is time-sliced (no single long task blocking the main thread).
+const root = createRoot(document.getElementById('root')!)
+startTransition(() =>
+  root.render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  ),
 )

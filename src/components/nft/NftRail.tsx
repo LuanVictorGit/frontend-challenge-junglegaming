@@ -14,7 +14,7 @@ export function NftRail({ title, items, loading }: { title: string; items?: NftS
 
   if (!loading && !items?.length) return null
   return (
-    <section aria-labelledby={id} className="container-k mt-16">
+    <section aria-labelledby={id} className="container-k defer-paint mt-16">
       <h2 id={id} className="border-b border-border pb-3 text-base font-bold text-primary">{title}</h2>
       <ul
         ref={ref}

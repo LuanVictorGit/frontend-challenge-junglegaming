@@ -122,6 +122,12 @@
   }
 }
 
+/* Below-the-fold blocks: layout/paint (and their lazy images) wait until they near the viewport */
+@utility defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {

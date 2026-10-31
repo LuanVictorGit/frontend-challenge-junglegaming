@@ -17,7 +17,7 @@ const POSTS = [
 
 export function Promos() {
   return (
-    <section aria-label="Coleções em destaque" className="container-k mt-20 grid gap-4 md:grid-cols-2">
+    <section aria-label="Coleções em destaque" className="container-k defer-paint mt-20 grid gap-4 md:grid-cols-2">
       {PROMOS.map((p) => (
         <article key={p.title} className="grid grid-cols-[40%_1fr] overflow-hidden rounded-sm bg-card">
           <NftImage image={p.image} alt="" sizes="(min-width: 768px) 240px, 40vw" className="h-full rounded-xl" />
@@ -36,7 +36,7 @@ export function Promos() {
 
 export function Journal() {
   return (
-    <section aria-labelledby="journal" className="container-k mt-20">
+    <section aria-labelledby="journal" className="container-k defer-paint mt-20">
       <h2 id="journal" className="text-center text-xl font-bold">Diário da Cunhagem</h2>
       <p className="mt-2 text-center text-xs text-sand">Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.</p>
       <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">

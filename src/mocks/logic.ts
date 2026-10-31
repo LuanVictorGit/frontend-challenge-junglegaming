@@ -36,7 +36,7 @@ export const toDetail = (n: DbNft): NftDetail => ({
 
 const norm = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const SORTS: Record<string, (a: DbNft, b: DbNft) => number> = {
-  recent: (a, b) => b.createdAt.localeCompare(a.createdAt),
+  recent: (a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0), // ISO timestamps: no ICU collation
   'price-asc': (a, b) => eth.cmp(priceOf(a), priceOf(b)) || a.name.localeCompare(b.name),
   'price-desc': (a, b) => eth.cmp(priceOf(b), priceOf(a)) || a.name.localeCompare(b.name),
   rating: (a, b) => b.rating - a.rating || b.reviewCount - a.reviewCount,

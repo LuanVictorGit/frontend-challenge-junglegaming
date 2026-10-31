@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { highlightsQuery, nftListQuery } from '@/api/queries'
 import { Catalog, HomeSearch, MobileSearchBar, toListParams } from '@/components/catalog/Catalog'
-import { useTitle } from '@/components/common/PageBits'
+import { Deferred, useTitle } from '@/components/common/PageBits'
 import { Journal, Promos } from '@/components/home/Editorial'
 import { Hero } from '@/components/home/Hero'
 import { useMedia } from '@/lib/use-media'
@@ -26,8 +26,10 @@ function Home() {
       {!desktop && <MobileSearchBar search={search} />}
       <Hero />
       <Catalog search={search} />
-      <Promos />
-      <Journal />
+      <Deferred>
+        <Promos />
+        <Journal />
+      </Deferred>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, type ReactNode } from 'react'
+import { Fragment, startTransition, useEffect, useState, type ReactNode } from 'react'
 import { Link, useRouter } from '@tanstack/react-router'
 import { ChevronLeft } from 'lucide-react'
 
@@ -6,6 +6,19 @@ export function useTitle(title: string) {
   useEffect(() => {
     document.title = title ? `${title} · Kurio` : 'Kurio — Marketplace de NFTs'
   }, [title])
+}
+
+let booted = false // later mounts (navigations) render at once: scroll restoration needs the full page
+
+/** On a cold load, below-the-fold UI mounts right after the first paint, as an interruptible (time-sliced) render. */
+export function Deferred({ children }: { children: ReactNode }) {
+  const [ready, setReady] = useState(booted)
+  useEffect(() => {
+    if (ready) return
+    booted = true
+    startTransition(() => setReady(true))
+  }, [ready])
+  return ready ? children : null
 }
 
 export function Breadcrumb({ items }: { items: { label: string; to?: string }[] }) {

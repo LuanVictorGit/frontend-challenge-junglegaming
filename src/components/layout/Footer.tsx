@@ -61,7 +61,7 @@ function Newsletter() {
 
 export function Footer() {
   return (
-    <footer className="container-k mt-20 pb-24 md:pb-6">
+    <footer className="container-k defer-paint mt-20 pb-24 md:pb-6">
       <section aria-label="Benefícios" className="grid gap-6 rounded-t-sm bg-card p-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_1.25fr] lg:gap-0 lg:px-7">
         {FEATURES.map(([letter, title, text]) => (
           <div key={title} className="lg:border-r lg:border-primary/50 lg:px-5 lg:first:pl-0">

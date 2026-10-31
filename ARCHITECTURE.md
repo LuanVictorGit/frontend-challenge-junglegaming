@@ -115,9 +115,12 @@ Skip link; foco movido para o conteúdo a cada troca de rota; foco preso e devol
 
 ## Performance
 
-- Code splitting por rota; MSW e `socket.io-client` carregados sob demanda, sem bloquear a primeira pintura.
+- Code splitting por rota; o chunk do MSW é baixado em paralelo ao entry (`modulepreload`) e sobe sem bloquear a primeira pintura; `socket.io-client` sob demanda.
 - CSS inline no HTML (sem requisição bloqueante); preload da fonte e da imagem LCP; imagens WebP responsivas (320/480/640/960 px com `srcset/sizes`).
 - Só o layout visível é montado (header desktop × navegação mobile, filtros laterais, tabela × lista do carrinho, variantes do hero), evitando imagens ocultas baixadas e trabalho de renderização inútil.
+- Primeira renderização enxuta: na carga fria, o corpo do catálogo, as seções editoriais e o rodapé montam logo após a primeira pintura, numa transição (render fatiado, sem tarefa longa); navegações seguintes montam tudo de uma vez (a restauração de scroll precisa da página inteira). A grade de resultados entra via `useDeferredValue` e seções abaixo da dobra usam `content-visibility: auto` (layout, pintura e imagens lazy só perto da viewport).
+- O service worker dos mocks (`public/mock-sw.js`, que importa o worker do MSW) só entrega `/api/*` ao MSW: imagens e chunks não fazem ida e volta pela thread principal.
+- Nada de ICU no caminho crítico: a ordenação padrão do mock compara timestamps ISO como texto e a data das avaliações é montada à mão (mesma saída do `Intl`, sem o custo do primeiro uso).
 - `tough-cookie`/`tldts` (usados pelo MSW só para persistir cookies de respostas simuladas, recurso que este mock não usa) são trocados por um shim via alias: o chunk de mocks caiu de 174 KB para 53 KB gzip.
 - Zod em modo `jitless` (sem `new Function`), compatível com a CSP e mais barato para payloads pequenos.
 - Skeletons com dimensões reservadas e `main` com altura mínima (rodapé fora da dobra durante o carregamento: CLS 0); animações de entrada não se aplicam à primeira pintura.

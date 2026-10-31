@@ -3,7 +3,8 @@ import { addToCart, boot, login } from './utils'
 
 // Visual regression (versioned baselines in e2e/visual.spec.ts-snapshots, deterministic fixtures).
 const settle = async (page: Page) => {
-  // Full-page shots: load lazy images up front, then wait for images and fonts.
+  // Full-page shots: render content-visibility blocks and load lazy images up front, then wait for images and fonts.
+  await page.addStyleTag({ content: '* { content-visibility: visible !important }' })
   await page.evaluate(() => document.querySelectorAll<HTMLImageElement>('img[loading=lazy]').forEach((i) => (i.loading = 'eager')))
   await page.waitForLoadState('networkidle')
   await page.waitForFunction(() => [...document.images].every((i) => i.complete))

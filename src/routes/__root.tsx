@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router'
 import { ErrorState } from '@/components/common/States'
-import { useTitle } from '@/components/common/PageBits'
+import { Deferred, useTitle } from '@/components/common/PageBits'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { MobileNav } from '@/components/layout/MobileNav'
@@ -55,7 +55,9 @@ function Root() {
           <Outlet />
         </div>
       </main>
-      <Footer />
+      <Deferred>
+        <Footer />
+      </Deferred>
       {!desktop && <MobileNav />}
       <Toaster position="top-center" closeButton mobileOffset={{ top: 64 }} />
       <LiveRegion />

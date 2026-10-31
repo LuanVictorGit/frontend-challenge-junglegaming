@@ -35,3 +35,8 @@
   for = "/mockServiceWorker.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/mock-sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"

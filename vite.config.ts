@@ -26,12 +26,26 @@ const inlineCss = (): Plugin => ({
   },
 })
 
+// The mock backend gates every request: fetch its chunk in parallel with the entry (modulepreload).
+const preloadMocks = (): Plugin => ({
+  name: 'kurio:preload-mocks',
+  apply: 'build',
+  enforce: 'post',
+  generateBundle(_, bundle) {
+    const html = bundle['index.html']
+    const mocks = Object.values(bundle).find((c) => c.type === 'chunk' && /[\\/]src[\\/]mocks[\\/]browser\.ts$/.test(c.facadeModuleId ?? ''))
+    if (html?.type !== 'asset' || !mocks) return
+    html.source = String(html.source).replace('</head>', `  <link rel="modulepreload" crossorigin href="/${mocks.fileName}">\n  </head>`)
+  },
+})
+
 export default defineConfig({
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     react(),
     tailwindcss(),
     inlineCss(),
+    preloadMocks(),
   ],
   resolve: {
     alias: [

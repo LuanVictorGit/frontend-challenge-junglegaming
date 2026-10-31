@@ -51,7 +51,7 @@ export async function startMocks() {
     history.replaceState(history.state, '', url)
   }
   const worker = setupWorker(...handlers, socketHandler)
-  await worker.start({ onUnhandledRequest: 'bypass', quiet: true, serviceWorker: { url: `${import.meta.env.BASE_URL}mockServiceWorker.js` } })
+  await worker.start({ onUnhandledRequest: 'bypass', quiet: true, serviceWorker: { url: `${import.meta.env.BASE_URL}mock-sw.js` } })
   window.__mock = controls
   setInterval(settleDue, 500) // settles pending orders and publishes order.updated
 }

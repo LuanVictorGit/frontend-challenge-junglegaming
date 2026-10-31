@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { Category, CATEGORY_LABEL, EthAmount, Network, NETWORK_LABEL, Sort, SORT_LABEL, Tab, type NftList } from '@/api/contracts'
 import { highlightsQuery, nftListQuery } from '@/api/queries'
 import { NftImage } from '@/components/common/NftImage'
+import { Deferred } from '@/components/common/PageBits'
 import { EmptyState, ErrorState } from '@/components/common/States'
 import { NftCard, NftCardSkeleton } from '@/components/nft/NftCard'
 import { Button } from '@/components/ui/button'
@@ -244,7 +245,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
   const desktop = useMedia('(min-width: 768px)')
   const params = toListParams(search)
   const list = useQuery(nftListQuery(params))
-  const data = list.data
+  const data = useDeferredValue(list.data) // results commit at low priority: the card grid render is time-sliced
   const tab = params.tab
   // A page beyond the end (e.g. typed by hand) falls back to the last existing page.
   useEffect(() => {
@@ -254,68 +255,70 @@ export function Catalog({ search }: { search: HomeSearch }) {
   return (
     <section id="catalogo" aria-labelledby="catalog-title" className="container-k mt-8 scroll-mt-4 md:mt-16 md:grid md:grid-cols-[260px_1fr] md:gap-8 lg:grid-cols-[310px_1fr] lg:gap-12">
       <h2 id="catalog-title" className="sr-only">Catálogo de NFTs</h2>
-      {desktop && (
-        <aside aria-label="Filtros">
-          <div className="rounded-sm bg-card p-5">
-            <Filters search={search} facets={data?.facets} set={set} />
-          </div>
-          <Featured />
-        </aside>
-      )}
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div role="group" aria-label="Listas" className="scrollbar-none flex gap-4 overflow-x-auto text-sm whitespace-nowrap">
-            {TABS.map(([t, label]) => (
-              <button
-                key={t}
-                type="button"
-                aria-pressed={tab === t}
-                onClick={() => set({ tab: t === 'all' ? undefined : t })}
-                className={cn('border-b-2 pb-1 transition-[color,border-color] duration-200', tab === t ? 'border-primary font-semibold text-primary' : 'border-transparent hover:text-primary')}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <SortSelect value={params.sort} set={set} className="hidden md:flex" />
-        </div>
-        <p className="sr-only" aria-live="polite">
-          {data && !list.isFetching ? `${data.total} NFTs encontrados. Página ${data.page} de ${data.totalPages}.` : ''}
-        </p>
-        <div aria-busy={list.isFetching} className={cn('mt-6 transition-opacity duration-300 ease-spring', list.isPlaceholderData && 'opacity-60')}>
-          {list.isPending ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
-              {Array.from({ length: PAGE_SIZE }, (_, i) => (
-                <NftCardSkeleton key={i} className="max-md:even:mt-6" />
+      <Deferred>
+        {desktop && (
+          <aside aria-label="Filtros">
+            <div className="rounded-sm bg-card p-5">
+              <Filters search={search} facets={data?.facets} set={set} />
+            </div>
+            <Featured />
+          </aside>
+        )}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div role="group" aria-label="Listas" className="scrollbar-none flex gap-4 overflow-x-auto text-sm whitespace-nowrap">
+              {TABS.map(([t, label]) => (
+                <button
+                  key={t}
+                  type="button"
+                  aria-pressed={tab === t}
+                  onClick={() => set({ tab: t === 'all' ? undefined : t })}
+                  className={cn('border-b-2 pb-1 transition-[color,border-color] duration-200', tab === t ? 'border-primary font-semibold text-primary' : 'border-transparent hover:text-primary')}
+                >
+                  {label}
+                </button>
               ))}
             </div>
-          ) : list.isError && (!data || list.isPlaceholderData) ? (
-            <ErrorState message={list.error.message} onRetry={() => list.refetch()} />
-          ) : !data?.items.length ? (
-            <EmptyState
-              title="Nenhum NFT encontrado"
-              message="Ajuste a busca ou remova alguns filtros para ver mais resultados."
-              action={
-                <Button variant="outline" onClick={() => set({ q: undefined, category: undefined, network: undefined, minPrice: undefined, maxPrice: undefined, tab: undefined })}>
-                  Limpar filtros
-                </Button>
-              }
-            />
-          ) : (
-            <>
-              {list.isError && <ErrorState className="mb-6 p-4" title="Falha ao atualizar" message={list.error.message} onRetry={() => list.refetch()} />}
-              <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
-                {data.items.map((n, i) => (
-                  <li key={n.id} className="max-md:even:mt-6">
-                    <NftCard nft={n} priority={i < 3} index={i} />
-                  </li>
+            <SortSelect value={params.sort} set={set} className="hidden md:flex" />
+          </div>
+          <p className="sr-only" aria-live="polite">
+            {data && !list.isFetching ? `${data.total} NFTs encontrados. Página ${data.page} de ${data.totalPages}.` : ''}
+          </p>
+          <div aria-busy={list.isFetching} className={cn('mt-6 transition-opacity duration-300 ease-spring', list.isPlaceholderData && 'opacity-60')}>
+            {!data && !list.isError ? (
+              <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
+                {Array.from({ length: PAGE_SIZE }, (_, i) => (
+                  <NftCardSkeleton key={i} className="max-md:even:mt-6" />
                 ))}
-              </ul>
-              <Pagination page={data.page} totalPages={data.totalPages} />
-            </>
-          )}
+              </div>
+            ) : list.isError && (!data || list.isPlaceholderData) ? (
+              <ErrorState message={list.error.message} onRetry={() => list.refetch()} />
+            ) : !data?.items.length ? (
+              <EmptyState
+                title="Nenhum NFT encontrado"
+                message="Ajuste a busca ou remova alguns filtros para ver mais resultados."
+                action={
+                  <Button variant="outline" onClick={() => set({ q: undefined, category: undefined, network: undefined, minPrice: undefined, maxPrice: undefined, tab: undefined })}>
+                    Limpar filtros
+                  </Button>
+                }
+              />
+            ) : (
+              <>
+                {list.isError && <ErrorState className="mb-6 p-4" title="Falha ao atualizar" message={list.error.message} onRetry={() => list.refetch()} />}
+                <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
+                  {data.items.map((n, i) => (
+                    <li key={n.id} className="max-md:even:mt-6">
+                      <NftCard nft={n} priority={i < 3} index={i} />
+                    </li>
+                  ))}
+                </ul>
+                <Pagination page={data.page} totalPages={data.totalPages} />
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </Deferred>
     </section>
   )
 }
