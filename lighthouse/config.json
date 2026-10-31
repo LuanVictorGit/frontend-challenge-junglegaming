@@ -1,11 +1,35 @@
 {
   "port": 4174,
   "runs": 3,
-  "profiles": ["mobile", "desktop"],
-  "categories": ["performance", "accessibility", "best-practices", "seo"],
-  "targets": { "performance": 90, "accessibility": 95, "best-practices": 95, "seo": 90 },
+  "chromeFlags": [
+    "--headless=new",
+    "--no-first-run",
+    "--disable-gpu"
+  ],
+  "profiles": [
+    "mobile",
+    "desktop"
+  ],
+  "categories": [
+    "performance",
+    "accessibility",
+    "best-practices",
+    "seo"
+  ],
+  "targets": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 90
+  },
   "pages": [
-    { "name": "home", "path": "/" },
-    { "name": "nft-detail", "path": "/nft/emerald-ape-042" }
+    {
+      "name": "home",
+      "path": "/"
+    },
+    {
+      "name": "nft-detail",
+      "path": "/nft/emerald-ape-042"
+    }
   ]
 }

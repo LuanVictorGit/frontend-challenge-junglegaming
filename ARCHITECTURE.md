@@ -107,6 +107,7 @@ Cliente (`src/lib/realtime.ts`): valida cada evento com zod; descarta `id` repet
 - Fixtures determinísticas: 36 NFTs (4 artes do Figma × variações de coleção, rede, preço, edições e estoque), 2 usuários, carteiras e cupons. A latência usa PRNG com semente fixa.
 - Cenários (`src/mocks/config.ts`) e faults pontuais (`__mock.failNext`) simulam lentidão, jitter, offline, HTTP 4xx/5xx, timeouts, sessão expirada, cupom inválido/expirado, preço alterado, edição esgotada, timeout após criar pedido e pagamento confirmado/recusado.
 - Ativação por configuração (`VITE_MOCKS`), inclusive no build publicado.
+- Service worker próprio (`public/mock-sw.js`, que importa o do MSW): só `/api/*` chega ao MSW e, como o MSW guarda as páginas ativas apenas em memória, um worker reiniciado pelo navegador após ficar ocioso (aba em segundo plano) readmite a página que chama a API em vez de deixar a chamada vazar para a rede. Uma resposta de API que não seja JSON vira falha transitória com nova tentativa, nunca um erro de parse na tela.
 - Limitações: o "servidor" roda dentro de cada aba (por isso a persistência local e a sincronização entre abas); Service Worker e WebCrypto exigem contexto seguro (`https` ou `localhost`).
 
 ## Acessibilidade

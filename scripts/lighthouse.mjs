@@ -55,7 +55,7 @@ function serveDist() {
 }
 
 async function localRun(url, profile) {
-  const chrome = await chromeLauncher.launch({ chromePath: chromium.executablePath(), chromeFlags: ['--headless=new', '--no-first-run'] })
+  const chrome = await chromeLauncher.launch({ chromePath: chromium.executablePath(), chromeFlags: cfg.chromeFlags })
   try {
     const { lhr } = await lighthouse(url, { port: chrome.port, onlyCategories: cfg.categories, logLevel: 'error' }, profile === 'desktop' ? desktopConfig : undefined)
     return lhr
@@ -127,7 +127,7 @@ const meta = {
   environment: psi
     ? { host: 'Google PageSpeed Insights infrastructure', benchmarkIndex: env.benchmarkIndex }
     : { os: `${os.type()} ${os.release()} (${os.arch()})`, cpu: os.cpus()[0]?.model, cores: os.cpus().length, memoryGB: Math.round(os.totalmem() / 2 ** 30), benchmarkIndex: env.benchmarkIndex },
-  conditions: `${remote ? 'Deployed production build (Netlify CDN)' : 'Production build (vite build) served locally with brotli'}; MSW mocks enabled, default scenario; cold load per run; Lighthouse mobile preset (simulated slow 4G, 4x CPU slowdown, Moto G Power viewport) and desktop preset.`,
+  conditions: `${remote ? 'Deployed production build (Netlify CDN)' : 'Production build (vite build) served locally with brotli'}; MSW mocks enabled, default scenario; cold load per run; Lighthouse mobile preset (simulated slow 4G, 4x CPU slowdown, Moto G Power viewport) and desktop preset${psi ? '' : `; Chrome flags: ${cfg.chromeFlags.join(' ')}`}.`,
 }
 await writeFile(join(root, 'lighthouse/summary.json'), JSON.stringify({ meta, targets: cfg.targets, summary, runs }, null, 2))
 
@@ -149,5 +149,7 @@ const md = [
   'Relatórios completos (HTML/JSON de cada execução) em `lighthouse/reports/`.',
   '',
 ]
-await writeFile(join(root, 'lighthouse/summary.md'), md.join('\n'))
+// Hand-written analysis (causes, justification, PSI cross-check) is versioned apart and appended.
+const analysis = await readFile(join(root, 'lighthouse/analysis.md'), 'utf8').catch(() => '')
+await writeFile(join(root, 'lighthouse/summary.md'), md.join('\n') + (analysis && `\n${analysis}`))
 console.log('\n' + md.join('\n'))
