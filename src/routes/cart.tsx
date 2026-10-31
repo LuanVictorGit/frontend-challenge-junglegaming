@@ -82,7 +82,7 @@ function Items({ cart }: { cart: Cart }) {
         </thead>
         <tbody>
           {cart.items.map((i) => (
-            <tr key={i.id} className="bg-card text-sm" data-testid="cart-row">
+            <tr key={i.id} className="animate-in bg-card text-sm fade-in-0 duration-300" data-testid="cart-row">
               <td className="rounded-l-sm p-2">
                 <div className="flex items-center gap-3">
                   <NftImage image={i.image} alt="" sizes="48px" className="size-12 rounded-xs" />
@@ -104,7 +104,7 @@ function Items({ cart }: { cart: Cart }) {
       {/* Mobile cards (Figma: Mobile / Carrinho de NFTs) */}
       <ul className="space-y-4 md:hidden">
         {cart.items.map((i) => (
-          <li key={i.id} className="flex overflow-hidden rounded-2xl bg-card" data-testid="cart-row">
+          <li key={i.id} className="flex animate-in overflow-hidden rounded-2xl bg-card fade-in-0 slide-in-from-bottom-2 duration-300 ease-spring" data-testid="cart-row">
             <NftImage image={i.image} alt="" sizes="96px" className="w-24 shrink-0" />
             <div className="flex flex-1 items-center gap-2 p-3">
               <div className="min-w-0 flex-1 space-y-1">

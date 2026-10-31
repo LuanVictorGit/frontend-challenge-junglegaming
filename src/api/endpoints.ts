@@ -1,9 +1,9 @@
 // Typed REST endpoints: every response is parsed against its contract at the transport boundary.
 import { z } from 'zod'
 import * as C from './contracts'
-import { http } from './http'
+import { ApiError, http } from './http'
 
-type Opts = { signal?: AbortSignal; headers?: Record<string, string>; timeout?: number; params?: object }
+type Opts = { signal?: AbortSignal; headers?: Record<string, string>; params?: object }
 const enc = encodeURIComponent
 const Favorites = z.object({ ids: z.array(z.string()) })
 
@@ -44,8 +44,18 @@ export const api = {
   },
   quote: (d: z.input<typeof C.QuoteInput>) => post(C.Quote, '/quote', d),
   orders: {
-    // Shorter timeout: a lost response is recovered by retrying with the same Idempotency-Key.
-    create: (d: C.CreateOrderInput, key: string) => post(C.Order, '/orders', d, { headers: { 'Idempotency-Key': key }, timeout: 8_000 }),
+    // 8s timeout (timer-based, not XHR): a lost response is recovered by retrying with the same Idempotency-Key.
+    create: async (d: C.CreateOrderInput, key: string) => {
+      const ctrl = new AbortController()
+      const timer = setTimeout(() => ctrl.abort(), 8_000)
+      try {
+        return await post(C.Order, '/orders', d, { headers: { 'Idempotency-Key': key }, signal: ctrl.signal })
+      } catch (e) {
+        throw ctrl.signal.aborted ? new ApiError('O servidor demorou para responder.', 0, 'TIMEOUT') : e
+      } finally {
+        clearTimeout(timer)
+      }
+    },
     get: (id: string, signal?: AbortSignal) => get(C.Order, `/orders/${enc(id)}`, { signal }),
   },
   profile: {

@@ -56,6 +56,7 @@ function ProfileForm({ user }: { user: User }) {
   const form = useForm<P>({ resolver: zodResolver(ProfileInput), defaultValues: { displayName: user.displayName, username: user.username, email: user.email, ensName: user.ensName, walletNickname: user.walletNickname } })
   const pw = useForm<Pw>({ resolver: zodResolver(PasswordSchema), defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' } })
   const saving = update.isPending || password.isPending
+  const { isDirty } = form.formState // read in render to subscribe
 
   // Client checks are UX only; the API re-validates type, size and content.
   const onFile = (f?: File) => {
@@ -73,7 +74,7 @@ function ProfileForm({ user }: { user: User }) {
     const [okProfile, okPw] = await Promise.all([form.trigger(), pwFilled ? pw.trigger() : true])
     if (!okProfile || !okPw) return
     try {
-      if (form.formState.isDirty) form.reset(await update.mutateAsync(ProfileInput.parse(form.getValues())) as P)
+      if (isDirty) form.reset(await update.mutateAsync(ProfileInput.parse(form.getValues())) as P)
       if (pwFilled) {
         await password.mutateAsync(pw.getValues())
         pw.reset()

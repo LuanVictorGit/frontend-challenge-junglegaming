@@ -38,29 +38,33 @@ export function Price({ value, compareAt, className }: { value: string; compareA
 
 const iconBtn = 'grid size-9 place-items-center rounded-full bg-background/85 text-foreground backdrop-blur transition hover:text-primary'
 
-export function NftCard({ nft, priority, sizes = '(min-width: 768px) 258px, 45vw', className }: { nft: NftSummary; priority?: boolean; sizes?: string; className?: string }) {
+export function NftCard({ nft, priority, index = 0, sizes = '(min-width: 768px) 258px, 45vw', className }: { nft: NftSummary; priority?: boolean; index?: number; sizes?: string; className?: string }) {
   const fav = useFavoriteToggle(nft)
   const add = useAddToCart()
   const to = { to: '/nft/$id', params: { id: nft.id } } as const
   return (
-    <article className={cn('group relative min-w-0', className)} data-testid="nft-card">
-      <div className="relative rounded-2xl bg-tile p-1 md:rounded-sm md:px-1 md:pt-7 md:pb-5">
+    <article
+      className={cn('group relative min-w-0 animate-in fade-in-0 slide-in-from-bottom-3 duration-500 ease-spring fill-mode-both', className)}
+      style={{ animationDelay: `${index < 3 ? 0 : Math.min(index, 9) * 45}ms` }}
+      data-testid="nft-card"
+    >
+      <div className="relative rounded-2xl bg-tile p-1 transition-[transform,box-shadow] duration-300 ease-spring group-hover:-translate-y-1 group-hover:shadow-[0_14px_30px_-14px_rgba(209,138,76,0.45)] md:rounded-sm md:px-1 md:pt-7 md:pb-5">
         {nft.badge && (
           <span className="absolute top-1 left-1 z-10 rounded-tl-xl rounded-br-md bg-primary px-2.5 py-1 text-[11px] font-bold text-primary-foreground md:rounded-xs">
             {nft.badge}
           </span>
         )}
         <Link {...to} tabIndex={-1} aria-hidden="true" className="block overflow-hidden rounded-xl">
-          <NftImage image={nft.image} alt="" sizes={sizes} priority={priority} className="transition-transform duration-300 group-hover:scale-[1.03]" />
+          <NftImage image={nft.image} alt="" sizes={sizes} priority={priority} className="transition-transform duration-500 ease-spring group-hover:scale-[1.05]" />
         </Link>
         {!nft.available && (
           <span className="absolute inset-x-1 bottom-1 rounded-b-xl bg-background/80 py-1 text-center text-xs font-semibold md:bottom-5">Esgotado</span>
         )}
         {/* Mobile: heart over the image (Figma); desktop: quick actions on hover/focus */}
         <button type="button" onClick={fav.toggle} aria-pressed={fav.on} aria-label={`Favoritar ${nft.name}`} className={cn(iconBtn, 'absolute top-2 right-2 z-10 size-8 md:hidden')}>
-          <Heart className={cn('size-4', fav.on && 'fill-primary text-primary')} />
+          <Heart className={cn('size-4', fav.on && 'animate-pop fill-primary text-primary')} />
         </button>
-        <div className="absolute inset-x-0 bottom-8 hidden justify-center gap-2 opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 md:flex">
+        <div className="absolute inset-x-0 bottom-8 hidden translate-y-2 justify-center gap-2 opacity-0 transition duration-300 ease-spring group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 md:flex">
           <button
             type="button"
             className={iconBtn}
@@ -71,7 +75,7 @@ export function NftCard({ nft, priority, sizes = '(min-width: 768px) 258px, 45vw
             <ShoppingCart className="size-4" />
           </button>
           <button type="button" className={iconBtn} onClick={fav.toggle} aria-pressed={fav.on} aria-label={`Favoritar ${nft.name}`}>
-            <Heart className={cn('size-4', fav.on && 'fill-primary text-primary')} />
+            <Heart className={cn('size-4', fav.on && 'animate-pop fill-primary text-primary')} />
           </button>
           <Link {...to} className={iconBtn} aria-label={`Ver detalhes de ${nft.name}`}>
             <Search className="size-4" />

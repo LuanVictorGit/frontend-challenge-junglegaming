@@ -83,7 +83,7 @@ async function simulate(method: string, path: string) {
 function route(method: Method, path: string, auth: Auth, fn: (c: Ctx) => unknown) {
   return http[method](API + path, async ({ request, params }) => {
     const url = new URL(request.url)
-    const simulated = await simulate(method.toUpperCase(), url.pathname.slice(API.length))
+    const simulated = await simulate(method.toUpperCase(), url.pathname.slice(API.length) + url.search)
     if (simulated) return simulated
     const headers = auth === 'none' ? undefined : { 'Cache-Control': 'no-store' }
     try {

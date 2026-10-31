@@ -133,11 +133,11 @@ function Detail({ nft }: { nft: NftDetail }) {
   )
 
   return (
-    <article>
+    <article className="animate-in fade-in-0 duration-300 ease-spring">
       <MobileTopBar
         action={
-          <button type="button" onClick={fav.toggle} aria-pressed={fav.on} aria-label={`Favoritar ${nft.name}`} className="grid size-9 place-items-center rounded-full bg-card text-primary">
-            <Heart className={cn('size-4', fav.on && 'fill-primary')} />
+          <button type="button" data-testid="favorite" onClick={fav.toggle} aria-pressed={fav.on} aria-label={`Favoritar ${nft.name}`} className="grid size-9 place-items-center rounded-full bg-card text-primary">
+            <Heart className={cn('size-4', fav.on && 'animate-pop fill-primary')} />
           </button>
         }
       />
@@ -192,8 +192,8 @@ function Detail({ nft }: { nft: NftDetail }) {
               <Button className="ml-auto h-9 w-36" onClick={() => buy(true)} disabled={blocked || add.isPending}>
                 {soldOut ? 'ESGOTADA' : max === 0 ? 'LIMITE ATINGIDO' : 'COMPRAR'}
               </Button>
-              <Button variant="outline" className="h-9" onClick={fav.toggle} aria-pressed={fav.on}>
-                <Heart className={cn(fav.on && 'fill-primary')} /> {fav.on ? 'Favoritado' : 'Favoritar'}
+              <Button variant="outline" className="h-9" data-testid="favorite" onClick={fav.toggle} aria-pressed={fav.on}>
+                <Heart className={cn(fav.on && 'animate-pop fill-primary')} /> {fav.on ? 'Favoritado' : 'Favoritar'}
               </Button>
             </div>
             <div className="mt-5">{info}</div>
@@ -226,7 +226,7 @@ function Detail({ nft }: { nft: NftDetail }) {
         </div>
 
         <Tabs defaultValue="details" className="mt-12" id="avaliacoes">
-          <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0">
+          <TabsList className="scrollbar-none h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-border bg-transparent p-0">
             {[['details', 'Detalhes do NFT'], ['reviews', `Avaliações de colecionadores (${nft.reviewCount})`]].map(([v, l]) => (
               <TabsTrigger key={v} value={v} className="flex-none rounded-none border-0 border-b-2 border-transparent px-0 pb-2 text-sm data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
                 {l}

@@ -12,7 +12,7 @@ const navCls = (active: boolean) =>
 
 export function CartBadge({ count }: { count: number }) {
   return (
-    <span aria-hidden="true" className="absolute -top-1.5 -right-2 grid size-4 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+    <span key={count} aria-hidden="true" className="absolute -top-1.5 -right-2 grid size-4 animate-pop place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
       {count > 9 ? '9+' : count}
     </span>
   )

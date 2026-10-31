@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Link, Outlet, useLocation } from '@tanstack/react-router'
 import { ErrorState } from '@/components/common/States'
@@ -26,11 +26,19 @@ function Root() {
   const qc = useQueryClient()
   const { pathname } = useLocation()
   const main = useRef<HTMLElement>(null)
-  const first = useRef(true)
+  const shown = useRef(pathname)
+  // Animate page entries only after the first navigation (keeps the initial paint/LCP instant).
+  const [prev, setPrev] = useState(pathname)
+  const [animate, setAnimate] = useState(false)
+  if (prev !== pathname) {
+    setPrev(pathname)
+    setAnimate(true)
+  }
   useEffect(() => startRealtime(qc), [qc])
   // Move focus to the new page on route changes (not on search-param changes).
   useEffect(() => {
-    if (first.current) return void (first.current = false)
+    if (shown.current === pathname) return
+    shown.current = pathname
     main.current?.focus({ preventScroll: true })
   }, [pathname])
 
@@ -41,11 +49,13 @@ function Root() {
       </a>
       <Header />
       <main id="main" ref={main} tabIndex={-1} className="outline-none">
-        <Outlet />
+        <div key={pathname} className={animate ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-spring' : undefined}>
+          <Outlet />
+        </div>
       </main>
       <Footer />
       <MobileNav />
-      <Toaster position="top-center" closeButton />
+      <Toaster position="top-center" closeButton mobileOffset={{ top: 64 }} />
       <LiveRegion />
       <SessionWatcher />
     </>

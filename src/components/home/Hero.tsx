@@ -30,24 +30,27 @@ function Dots({ i, set, className }: { i: number; set: (n: number) => void; clas
 
 export function Hero() {
   const [i, setI] = useState(0)
+  const [moved, setMoved] = useState(false) // first slide renders without animation (LCP)
+  const go = (n: number) => (setI(n), setMoved(true))
   const s = SLIDES[i]
+  const fx = moved ? 'animate-in fade-in-0 duration-500 ease-spring' : ''
   return (
     <section aria-roledescription="carrossel" aria-label="Destaques da Kurio" className="container-k">
       {/* Desktop (Figma: Desktop / Início) */}
       <div className="hidden grid-cols-[1fr_450px] items-center gap-10 py-12 md:grid">
         <div className="relative flex h-full flex-col justify-center lg:pl-10">
           <p className="text-base">Bem-vindo à Kurio</p>
-          <h1 className="mt-5 max-w-[600px] text-[40px] leading-[1.45] font-bold tracking-wide uppercase lg:text-[48px]">{s.title}</h1>
+          <h1 key={i} className={`mt-5 max-w-[600px] text-[40px] leading-[1.45] font-bold tracking-wide uppercase lg:text-[48px] ${fx} slide-in-from-left-2`}>{s.title}</h1>
           <p className="mt-3 max-w-[570px] text-[15px] leading-6 text-sand">
             Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte digital rara, apoie artistas e tenha uma parte da cultura da internet.
           </p>
           <Button asChild size="lg" className="mt-9 w-[140px] text-base font-bold">
             <a href="#catalogo">EXPLORAR</a>
           </Button>
-          <Dots i={i} set={setI} className="absolute right-0 bottom-0" />
+          <Dots i={i} set={go} className="absolute right-0 bottom-0" />
         </div>
         <div className="overflow-hidden rounded-2xl">
-          <NftImage image={s.image} alt={s.alt} sizes="450px" priority={i === 0} />
+          <NftImage key={i} image={s.image} alt={s.alt} sizes="450px" priority={i === 0} className={`${fx} zoom-in-[1.04]`} />
         </div>
       </div>
       {/* Mobile (Figma: Mobile / Início) */}
@@ -55,18 +58,18 @@ export function Hero() {
         <div className="grid grid-cols-[1fr_42%] gap-3">
           <div>
             <p className="text-[11px]">Bem-vindo à Kurio</p>
-            <h1 className="mt-2 text-lg leading-snug font-bold uppercase">{s.short}</h1>
+            <h1 key={i} className={`mt-2 text-lg leading-snug font-bold uppercase ${fx}`}>{s.short}</h1>
             <p className="mt-2 text-xs leading-relaxed text-sand">Descubra NFTs selecionados de criadores do mundo todo.</p>
             <a href="#catalogo" className="mt-2 inline-flex items-center gap-2 text-xs font-bold text-primary">
               EXPLORAR <ArrowRight className="size-4" />
             </a>
           </div>
           <div className="relative">
-            <NftImage image={s.image} alt={s.alt} sizes="40vw" priority={i === 0} className="rounded-xl" />
+            <NftImage key={i} image={s.image} alt={s.alt} sizes="40vw" priority={i === 0} className={`rounded-xl ${fx}`} />
             <NftImage image={SLIDES[(i + 1) % 3].image} alt="" sizes="20vw" className="absolute -bottom-2 -left-4 w-1/2 rounded-lg ring-2 ring-[#4a2e1b]" />
           </div>
         </div>
-        <Dots i={i} set={setI} className="mt-3 justify-center" />
+        <Dots i={i} set={go} className="mt-3 justify-center" />
       </div>
     </section>
   )

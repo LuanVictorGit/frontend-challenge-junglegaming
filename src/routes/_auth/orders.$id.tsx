@@ -10,7 +10,7 @@ import { EmptyState, ErrorState } from '@/components/common/States'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatEth } from '@/lib/eth'
-import { formatDate, shortAddress } from '@/lib/utils'
+import { shortAddress, shortDate } from '@/lib/utils'
 
 export const Route = createFileRoute('/_auth/orders/$id')({ component: OrderPage })
 
@@ -43,7 +43,7 @@ function OrderPage() {
 function Status({ o }: { o: Order }) {
   const pending = o.status === 'pending'
   return (
-    <section role="status" aria-live="polite" className="mx-auto max-w-[520px] space-y-4 rounded-sm bg-card p-8 text-center" data-testid={`order-${o.status}`}>
+    <section role="status" aria-live="polite" className="mx-auto max-w-[520px] animate-in space-y-4 rounded-sm bg-card p-8 text-center fade-in-0 duration-300" data-testid={`order-${o.status}`}>
       {pending ? <Loader2 aria-hidden="true" className="mx-auto size-10 animate-spin text-primary" /> : <X aria-hidden="true" className="mx-auto size-10 text-destructive" />}
       <h1 className="text-lg font-bold">{pending ? 'Aguardando confirmação na rede' : 'Pagamento recusado'}</h1>
       <p className="text-sm text-sand">
@@ -74,7 +74,7 @@ const ThankYou = () => (
 /** Receipt rendered only from the order snapshot (later catalog changes never alter it). */
 function Receipt({ o }: { o: Order }) {
   return (
-    <section aria-labelledby="receipt-title" className="relative mx-auto max-w-[520px] overflow-hidden rounded-sm bg-card" data-testid="order-confirmed">
+    <section aria-labelledby="receipt-title" className="relative mx-auto max-w-[520px] animate-in overflow-hidden rounded-sm bg-card fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-500 ease-spring" data-testid="order-confirmed">
       <Link to="/" aria-label="Fechar e voltar ao início" className="absolute top-3 right-3 text-primary hover:text-foreground">
         <X className="size-4" />
       </Link>
@@ -84,7 +84,7 @@ function Receipt({ o }: { o: Order }) {
       </div>
       <dl className="grid grid-cols-2 gap-y-3 border-y border-primary/50 px-6 py-3 text-[11px] sm:grid-cols-4 sm:divide-x sm:divide-border">
         <div className="sm:pr-3"><dt className="font-bold">ID da transação</dt><dd className="text-sand" title={o.txHash ?? ''}>{shortAddress(o.txHash ?? '')}</dd></div>
-        <div className="sm:px-3"><dt className="font-bold">Data</dt><dd className="text-sand">{formatDate(o.updatedAt)}</dd></div>
+        <div className="sm:px-3"><dt className="font-bold">Data</dt><dd className="text-sand">{shortDate(o.updatedAt)}</dd></div>
         <div className="sm:px-3"><dt className="font-bold">Total</dt><dd className="text-sand">{formatEth(o.summary.total, 3)} ETH</dd></div>
         <div className="sm:pl-3"><dt className="font-bold">Carteira</dt><dd className="text-sand">{PROVIDER_LABEL[o.wallet.provider]}</dd></div>
       </dl>

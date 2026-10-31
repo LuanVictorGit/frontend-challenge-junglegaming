@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
+import { useIsMutating, useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Wallet as WalletIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -57,11 +57,12 @@ function CheckoutPage() {
   const wallets = useQuery(walletsQuery(uid))
   const conn = useQuery(connectionQuery(uid))
   const all = [cart, profile, wallets, conn]
+  const creating = useIsMutating({ mutationKey: ['create-order'] }) > 0
   const failed = all.find((q) => q.isError)
   let body
   if (all.some((q) => q.isPending)) body = <CheckoutSkeleton />
   else if (failed) body = <ErrorState className="mt-6" message={failed.error?.message} onRetry={() => all.forEach((q) => q.refetch())} />
-  else if (!cart.data!.items.length)
+  else if (!cart.data!.items.length && !creating)
     body = <EmptyState className="mt-6" title="Seu carrinho está vazio" action={<Button asChild><Link to="/">Explorar NFTs</Link></Button>} />
   else if (!wallets.data!.primary && !wallets.data!.secondary)
     body = (
@@ -110,6 +111,7 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
   const [review, setReview] = useState<Quote | null>(null)
   const [changes, setChanges] = useState<string[]>([])
   const [stale, setStale] = useState(false)
+  const sending = useRef(false) // synchronous guard against double clicks
   const network = values.network as Network
   const provider = values.walletType as Provider
   const connected = connection?.slot === slot && connection.network === network && connection.provider === provider ? connection : null
@@ -137,14 +139,12 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
   const onReview = form.handleSubmit(() => (connected ? requestQuote() : toast.error('Conecte a carteira selecionada antes de revisar o pedido.')))
 
   const confirm = () => {
-    if (!review || stale || order.isPending) return
+    if (!review || stale || sending.current) return
+    sending.current = true
     order.mutate(
       { quoteId: review.id, fingerprint: review.fingerprint, walletSlot: slot, collector: CollectorInput.parse(form.getValues()) },
       {
-        onSuccess: (o) => {
-          sessionStorage.removeItem(draftKey(user.id))
-          navigate({ to: '/orders/$id', params: { id: o.id } })
-        },
+        onSettled: () => void (sending.current = false),
         onError: (e) => {
           if (e instanceof ApiError && e.code === 'QUOTE_OUTDATED') {
             // Server revalidated and found changes: show the new quote and require a new confirmation.

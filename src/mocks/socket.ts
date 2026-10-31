@@ -22,7 +22,9 @@ const userOf = (c: Conn) => {
 export const socketHandler = ws.link(URL).addEventListener('connection', (connection) => {
   const { client } = connection
   // Simulated outage: drop the transport so socket.io-client retries with backoff.
-  if (config.scenario === 'offline' || Date.now() < blockedUntil) return void queueMicrotask(() => client.close())
+  if (config.scenario === 'offline' || Date.now() < blockedUntil)
+    // Fire `error` so socket.io-client retries right away instead of waiting for its connect timeout.
+    return void queueMicrotask(() => ((client as unknown as { socket: WebSocket }).socket.dispatchEvent(new Event('error')), client.close()))
   const conn: Conn = { token: null, io: toSocketIo(connection), close: () => client.close() }
   conns.set(client.id, conn)
   // The binding mocks the Engine.IO handshake but not heartbeats: ping so the client never times out.

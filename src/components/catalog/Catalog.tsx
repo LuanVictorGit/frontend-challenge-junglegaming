@@ -260,7 +260,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
                 type="button"
                 aria-pressed={tab === t}
                 onClick={() => set({ tab: t === 'all' ? undefined : t })}
-                className={cn('border-b-2 pb-1', tab === t ? 'border-primary font-semibold text-primary' : 'border-transparent hover:text-primary')}
+                className={cn('border-b-2 pb-1 transition-[color,border-color] duration-200', tab === t ? 'border-primary font-semibold text-primary' : 'border-transparent hover:text-primary')}
               >
                 {label}
               </button>
@@ -271,14 +271,14 @@ export function Catalog({ search }: { search: HomeSearch }) {
         <p className="sr-only" aria-live="polite">
           {data && !list.isFetching ? `${data.total} NFTs encontrados. Página ${data.page} de ${data.totalPages}.` : ''}
         </p>
-        <div aria-busy={list.isFetching} className={cn('mt-6 transition-opacity', list.isPlaceholderData && 'opacity-60')}>
+        <div aria-busy={list.isFetching} className={cn('mt-6 transition-opacity duration-300 ease-spring', list.isPlaceholderData && 'opacity-60')}>
           {list.isPending ? (
             <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
               {Array.from({ length: PAGE_SIZE }, (_, i) => (
                 <NftCardSkeleton key={i} className="max-md:even:mt-6" />
               ))}
             </div>
-          ) : list.isError && !data ? (
+          ) : list.isError && (!data || list.isPlaceholderData) ? (
             <ErrorState message={list.error.message} onRetry={() => list.refetch()} />
           ) : !data?.items.length ? (
             <EmptyState
@@ -296,7 +296,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
               <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
                 {data.items.map((n, i) => (
                   <li key={n.id} className="max-md:even:mt-6">
-                    <NftCard nft={n} priority={i < 3} />
+                    <NftCard nft={n} priority={i < 3} index={i} />
                   </li>
                 ))}
               </ul>

@@ -1,5 +1,6 @@
 // TanStack Query layer: keys, query options and mutations (cache sync lives here, not in components).
 import { keepPreviousData, queryOptions, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { announce } from '@/lib/announce'
 import { cartId, session, useSession } from '@/lib/session'
@@ -152,7 +153,14 @@ function idempotencyKey(uid: string, quoteId: string) {
 }
 export function useCreateOrder() {
   const uid = useUid()
+  const router = useRouter()
   return useMutation({
+    mutationKey: ['create-order'],
+    // Hook-level: runs even if the checkout unmounts meanwhile (e.g. cart emptied by order.updated).
+    onSuccess: (o) => {
+      sessionStorage.removeItem(`kurio:checkout:${uid}`)
+      router.navigate({ to: '/orders/$id', params: { id: o.id } })
+    },
     mutationFn: async (input: CreateOrderInput) => {
       const key = idempotencyKey(uid!, input.quoteId)
       for (let attempt = 0; ; attempt++) {

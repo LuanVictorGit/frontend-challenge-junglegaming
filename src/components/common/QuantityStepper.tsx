@@ -12,7 +12,7 @@ export function QuantityStepper({
         <Minus className="size-3.5" strokeWidth={3} />
       </button>
       <output aria-live="polite" className="min-w-4 text-center text-sm tabular-nums">
-        {value}
+        <span key={value} className="inline-block animate-in fade-in-0 zoom-in-75 duration-200 ease-spring">{value}</span>
       </output>
       <button type="button" className={btn} onClick={() => onChange(value + 1)} disabled={disabled || value >= max} aria-label={`Aumentar quantidade de ${label}`}>
         <Plus className="size-3.5" strokeWidth={3} />

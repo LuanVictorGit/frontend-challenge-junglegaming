@@ -62,25 +62,25 @@ function Newsletter() {
 export function Footer() {
   return (
     <footer className="container-k mt-20 pb-24 md:pb-6">
-      <section aria-label="Benefícios" className="grid gap-6 rounded-t-sm bg-card p-6 md:grid-cols-[repeat(3,1fr)_1.25fr] md:gap-0 md:px-7">
+      <section aria-label="Benefícios" className="grid gap-6 rounded-t-sm bg-card p-6 sm:grid-cols-2 lg:grid-cols-[repeat(3,1fr)_1.25fr] lg:gap-0 lg:px-7">
         {FEATURES.map(([letter, title, text]) => (
-          <div key={title} className="md:border-r md:border-primary/50 md:px-5 md:first:pl-0">
+          <div key={title} className="lg:border-r lg:border-primary/50 lg:px-5 lg:first:pl-0">
             <span aria-hidden="true" className="grid size-10 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">{letter}</span>
             <h2 className="mt-3 text-sm font-bold">{title}</h2>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{text}</p>
           </div>
         ))}
-        <div className="md:pl-5">
+        <div className="lg:pl-5">
           <Newsletter />
         </div>
       </section>
-      <div className="grid gap-3 bg-[#3b2414] px-6 py-4 text-xs md:grid-cols-4 md:items-center md:px-5">
+      <div className="grid gap-3 bg-[#3b2414] px-6 py-4 text-xs sm:grid-cols-2 lg:grid-cols-4 lg:items-center lg:px-5">
         <Logo className="text-xs" />
         <p>Feito para colecionadores, criadores e cultura</p>
         <a href="mailto:contato@email.com" className="hover:text-primary">contato@email.com</a>
         <a href="tel:+551140028922" className="hover:text-primary">+55 11 4002 8922</a>
       </div>
-      <div className="grid grid-cols-2 gap-8 rounded-b-sm bg-card px-6 py-6 md:grid-cols-4 md:px-5">
+      <div className="grid grid-cols-2 gap-8 rounded-b-sm bg-card px-6 py-6 lg:grid-cols-4 lg:px-5">
         <nav aria-label="Meu perfil">
           <h2 className="text-sm font-bold">Meu perfil</h2>
           <ul className="mt-3 space-y-2">
@@ -107,10 +107,10 @@ export function Footer() {
             ))}
           </ul>
         </nav>
-        <div className="col-span-2 space-y-5 md:col-span-1">
+        <div className="col-span-2 space-y-5 lg:col-span-1">
           <div>
             <h2 className="text-sm font-bold">Redes sociais</h2>
-            <ul className="mt-3 flex gap-2">
+            <ul className="mt-3 flex flex-wrap gap-2">
               {SOCIAL.map(([label, href, Icon]) => (
                 <li key={label}>
                   <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} (abre em nova aba)`} className="grid size-8 place-items-center rounded-xs border border-primary/70 text-primary hover:bg-primary/10">

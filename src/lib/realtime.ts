@@ -105,7 +105,7 @@ export function startRealtime(qc: QueryClient) {
     await backendReady
     const { io } = await import('socket.io-client') // lazy: keeps it off the critical path
     if (my !== gen) return
-    const s = io(SOCKET_URL, { transports: ['websocket'], auth: { token }, reconnectionDelay: 500, reconnectionDelayMax: 4000 })
+    const s = io(SOCKET_URL, { transports: ['websocket'], auth: { token }, timeout: 5000, reconnectionDelay: 500, reconnectionDelayMax: 4000 })
     socket = s
     let connectedBefore = false
     s.on('connect', () => {
