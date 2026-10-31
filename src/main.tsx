@@ -12,6 +12,8 @@ if (mocksEnabled)
     .then((m) => m.startMocks())
     .catch((e) => console.error('[mocks] failed to start', e))
     .finally(markBackendReady)
+// Without mocks, drop a mock worker left by a previous build: a controlled page must always have its MSW client.
+else navigator.serviceWorker?.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()))
 
 // Transition: the initial render is time-sliced (no single long task blocking the main thread).
 const root = createRoot(document.getElementById('root')!)

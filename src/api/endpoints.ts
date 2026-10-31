@@ -7,10 +7,16 @@ type Opts = { signal?: AbortSignal; headers?: Record<string, string>; params?: o
 const enc = encodeURIComponent
 const Favorites = z.object({ ids: z.array(z.string()) })
 
-const get = async <S extends z.ZodType>(s: S, url: string, o?: Opts): Promise<z.output<S>> => s.parse((await http.get(url, o)).data)
+// A response that breaks its contract is a server failure (friendly message, retried like a 5xx), never a raw zod dump.
+const parse = <S extends z.ZodType>(s: S, data: unknown): z.output<S> => {
+  const r = s.safeParse(data)
+  if (!r.success) throw new ApiError('Resposta inesperada do servidor. Tente novamente.', 502, 'INTERNAL', undefined, r.error.issues)
+  return r.data
+}
+const get = async <S extends z.ZodType>(s: S, url: string, o?: Opts): Promise<z.output<S>> => parse(s, (await http.get(url, o)).data)
 const send = (method: 'post' | 'put' | 'patch' | 'delete') =>
   async <S extends z.ZodType>(s: S, url: string, data?: unknown, o?: Opts): Promise<z.output<S>> =>
-    s.parse((await http.request({ method, url, data, ...o })).data)
+    parse(s, (await http.request({ method, url, data, ...o })).data)
 const post = send('post'), put = send('put'), patch = send('patch'), del = send('delete')
 
 // Drop empty params so URLs stay canonical.

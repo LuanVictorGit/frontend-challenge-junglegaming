@@ -35,7 +35,13 @@ http.interceptors.request.use(async (cfg) => {
   return cfg
 })
 
-http.interceptors.response.use(undefined, (err: AxiosError) => {
+// An API answer that is not JSON (e.g. a host's HTML fallback) is a transient failure, retried like a 5xx.
+const isJson = (type: unknown) => String(type ?? '').includes('json')
+
+http.interceptors.response.use((res) => {
+  if (res.status !== 204 && !isJson(res.headers['content-type'])) throw new ApiError('Serviço indisponível no momento. Tente novamente.', 503, 'TRANSIENT')
+  return res
+}, (err: AxiosError) => {
   if (axios.isCancel(err)) return Promise.reject(new ApiError('Requisição cancelada.', 0, 'CANCELED'))
   if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') return Promise.reject(new ApiError('O servidor demorou para responder.', 0, 'TIMEOUT'))
   if (!err.response) return Promise.reject(new ApiError('Sem conexão com o servidor. Verifique sua internet.', 0, 'NETWORK'))
