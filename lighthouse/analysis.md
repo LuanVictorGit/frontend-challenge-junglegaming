@@ -23,14 +23,12 @@ Todas as metas foram atingidas na mediana das 3 execuções por página e perfil
 
   Num deploy real, o chunk de mocks (~41 KB brotli), o service worker e a CPU dos handlers ficariam no servidor.
 
-### O que foi feito
-
-Na mesma configuração, o mobile saiu de 74–76 para 91–92.
+### Otimizações aplicadas
 
 - **Caminho crítico:**
   - CSS embutido no HTML (o arquivo continua publicado para os chunks que o listam);
   - preload da fonte e da imagem LCP;
-  - WebP responsivo com `sizes` igual à largura renderizada: cards, trilhos e detalhe não baixam mais variantes maiores que o necessário;
+  - WebP responsivo com `sizes` igual à largura renderizada (cards, trilhos e detalhe baixam a variante adequada);
   - chunk de mocks baixado em paralelo ao entry.
 - **Menos JS antes da primeira pintura:** filtros, ordenação e a gaveta mobile (Select, Slider e Dialog do Radix), o diálogo de busca e o zoom do detalhe carregam no primeiro uso.
 - **Primeira renderização enxuta:**

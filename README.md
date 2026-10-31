@@ -5,7 +5,7 @@ Implementação do [desafio frontend da Jungle Gaming](https://github.com/jungle
 - **Demo publicada:** https://junglenfts.netlify.app (mocks ativos; acesso direto e refresh em qualquer rota)
 - **Stack:** React 19 · TypeScript · TanStack Router · TanStack Query · Axios · Socket.IO client · Tailwind CSS v4 · shadcn/ui · MSW 2 (+ `@mswjs/socket.io-binding`) · Playwright · Lighthouse
 - Decisões técnicas, contratos e limitações: [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- Mapa de cada requisito do enunciado para o código e o teste que o comprova: [Conformidade com o desafio](#conformidade-com-o-desafio-item-a-item)
+- Onde cada item do enunciado está implementado e testado: [Mapa de requisitos](#mapa-de-requisitos)
 
 ## Setup
 
@@ -96,14 +96,14 @@ Controle fino pelo console do navegador (o mesmo usado pelos testes): `window.__
 
 Configuração versionada em `lighthouse/config.json`. Resultados (mediana de 3 execuções por página e perfil, com LCP, CLS e TBT, versões, ambiente e condições) em [`lighthouse/summary.md`](lighthouse/summary.md), com os relatórios HTML/JSON em `lighthouse/reports/` e a análise dos resultados.
 
-## Conformidade com o desafio (item a item)
+## Mapa de requisitos
 
-Cada requisito do [enunciado](https://github.com/junglegaming/frontend-challenge), na ordem das suas seções, com onde e como foi feito e o teste que comprova. Os testes ficam em [`e2e/`](e2e) e rodam em desktop (1440×900) e mobile (390×844).
+Onde cada seção do [enunciado](https://github.com/junglegaming/frontend-challenge) está implementada, com os testes correspondentes em [`e2e/`](e2e) (executados em desktop 1440×900 e mobile 390×844).
 
 ### 1. Escopo
 
-- **Descoberta, compra e conta, em desktop e mobile, com dados simulados:** telas em [`src/routes`](src/routes) e backend simulado em [`src/mocks`](src/mocks). Só o layout do breakpoint visível é montado (`useMedia`, [`src/lib/use-media.ts`](src/lib/use-media.ts)).
-- **Ações fora do escopo não fingem sucesso:** `soon()` em [`src/lib/utils.ts`](src/lib/utils.ts) avisa que a ação "não faz parte desta demonstração" (rodapé, diário, newsletter, links de ajuda).
+- **Descoberta, compra e conta, em desktop e mobile, com dados simulados:** telas em [`src/routes`](src/routes) e backend simulado em [`src/mocks`](src/mocks). Cada breakpoint monta só o próprio layout (`useMedia`, [`src/lib/use-media.ts`](src/lib/use-media.ts)).
+- **Ações fora do escopo** (diário, newsletter, links de ajuda e áreas não entregues): exibem um aviso de que não fazem parte da demonstração (`soon()` em [`src/lib/utils.ts`](src/lib/utils.ts)).
 
 ### 2. Stack obrigatória
 
@@ -140,7 +140,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 **Catálogo e detalhe**
 
 - **Estado na URL:** busca, filtros, ordenação e página sobrevivem a refresh e ao histórico (`validateSearch: HomeSearch`). `useSetSearch` cria uma entrada de histórico a cada mudança e reinicia a paginação.
-- **Consultas fiéis aos parâmetros:** a chave da consulta inclui os parâmetros (`nftListQuery`). Há estado vazio (`EmptyState`), falha com nova tentativa (`ErrorState`) e dados anteriores mantidos durante a troca (`keepPreviousData`). Respostas fora de ordem são descartadas pela chave e pelo `AbortSignal` (cenário `jitter`).
+- **Consultas por parâmetros:** a chave da consulta inclui os parâmetros (`nftListQuery`). Há estado vazio (`EmptyState`), falha com nova tentativa (`ErrorState`) e dados anteriores mantidos durante a troca (`keepPreviousData`). Respostas fora de ordem são descartadas pela chave e pelo `AbortSignal` (cenário `jitter`).
 - **Detalhe:**
   - acesso direto (fallback SPA em [`netlify.toml`](netlify.toml));
   - NFT inexistente (404 com estado próprio);
@@ -172,7 +172,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 
 **Conta e sessão**
 
-- **Sessão integrada:** cadastro, login, logout e sessão (`useLogin`, `useRegister`, `useLogout`, `useSessionCheck`).
+- **Sessão:** cadastro, login, logout e sessão integrados à API simulada (`useLogin`, `useRegister`, `useLogout`, `useSessionCheck`).
 - **Autenticação obrigatória:** checkout, perfil, carteiras, favoritos e pedidos exigem login na rota (`_auth.tsx`) e no servidor (401 em todo endpoint privado, 403 para pedido de outro usuário).
 - **Sessão recuperável:** sobrevive ao refresh e é revalidada em `GET /auth/session`.
 - **Expiração:** tratada na navegação e no checkout ([`SessionWatcher.tsx`](src/components/layout/SessionWatcher.tsx) e interceptor de 401), com o rascunho do checkout preservado para retomada.
@@ -192,7 +192,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 
 ### 5. Contratos REST
 
-- **Recursos mínimos:** sessão e conta, NFTs, favoritos, carrinho, cotação, pedidos, perfil e carteiras, em [`src/mocks/handlers.ts`](src/mocks/handlers.ts). Tabela completa em [`ARCHITECTURE.md`](ARCHITECTURE.md#contratos-rest).
+- **Recursos:** sessão e conta, NFTs, favoritos, carrinho, cotação, pedidos, perfil e carteiras, em [`src/mocks/handlers.ts`](src/mocks/handlers.ts). Tabela completa em [`ARCHITECTURE.md`](ARCHITECTURE.md#contratos-rest).
 - **Erros padronizados** (`ApiErrorBody`/`ErrorCode`):
   - validação (422);
   - sessão inválida ou expirada (401);
@@ -208,7 +208,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 - **Estado consistente:** um banco único para catálogo, favoritos, carrinho, perfil, carteiras e pedidos ([`db.ts`](src/mocks/db.ts)), persistido em `localStorage`. `?reset` ou `__mock.reset()` restaura o seed.
 - **Rede configurável e reproduzível** ([`config.ts`](src/mocks/config.ts)): cenários `slow`, `jitter` (latência variável com semente fixa), `offline` e `server-error`, além de `__mock.failNext({ status, network, delay, times })` e `setLatency`.
 - **Fixtures** ([`fixtures.ts`](src/mocks/fixtures.ts)): 36 NFTs em 9 coleções e 3 redes, 2 usuários e cupons.
-- **Cenários determinísticos exigidos** (tabela completa em [Cenários dos mocks](#cenários-dos-mocks)):
+- **Cenários determinísticos** (tabela completa em [Cenários dos mocks](#cenários-dos-mocks)):
   - sucesso (`default`) e resultado vazio (`empty`);
   - latência variável e respostas fora de ordem (`jitter`);
   - falhas de conexão e HTTP 4xx/5xx (`offline`, `server-error`, `failNext`);
@@ -231,7 +231,7 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
   - há um socket por sessão, reaberto no login e no logout;
   - eventos privados só vão para a sessão dona ([`socket.ts`](src/mocks/socket.ts));
   - listeners são liberados ao encerrar o ciclo de vida.
-- **Cenários exigidos** (`realtime.spec.ts`):
+- **Cenários** (`realtime.spec.ts`):
   - preço muda com o NFT no carrinho, a interface avisa, o resumo é atualizado e o checkout bloqueia a cotação desatualizada;
   - pedido pendente sobrevive a queda de conexão e a recarga, sem nova compra.
 
@@ -242,7 +242,11 @@ Perfil, carteiras e confirmação também funcionam no mobile (navegação de co
 - **Fidelidade ao Figma:** identidade em tokens ([`index.css`](src/index.css)) e componentes shadcn/ui adaptados. Desvios e substituições de assets estão em [`ARCHITECTURE.md`](ARCHITECTURE.md#decisões-de-ux-e-desvios-do-figma).
 - **Responsividade:** desktop, tablet e mobile (390, 768 e 1440 px), sem overflow horizontal.
 - **Skeletons com shimmer** ([`skeleton.tsx`](src/components/ui/skeleton.tsx)) no catálogo, no detalhe e no resumo do carrinho, com dimensões reservadas (CLS 0). O shimmer desliga com `prefers-reduced-motion`.
-- **Teclado e foco:** foco visível (`:focus-visible`), link "Pular para o conteúdo" e foco movido a cada troca de rota ([`__root.tsx`](src/routes/__root.tsx)). Em diálogos e gavetas, o foco fica preso e volta ao gatilho ao fechar (Radix), inclusive nos carregados sob demanda. Painéis de abas também mostram o indicador de foco. No mobile, o foco nunca fica escondido atrás das barras fixas (`scroll-padding`). As setas funcionam em todo controle de grupo: carrossel (←/→), listas do catálogo e galeria do detalhe (abas WAI-ARIA com uma única parada de Tab), opções de filtro (↑/↓), quantidade (↑/↓), além de edições (rádio), abas, ordenação e faixa de preço; Home/End vão ao início/fim. O fluxo principal é coberto por um teste operado só pelo teclado ([`a11y-loading.spec.ts`](e2e/a11y-loading.spec.ts)).
+- **Teclado e foco:** foco visível (`:focus-visible`), link "Pular para o conteúdo" e foco levado ao conteúdo a cada troca de rota ([`__root.tsx`](src/routes/__root.tsx)). Diálogos e gavetas prendem o foco e o devolvem ao gatilho ao fechar (Radix). No mobile, `scroll-padding` mantém o elemento focado fora das barras fixas.
+- **Navegação por setas** ([`src/lib/arrow-nav.ts`](src/lib/arrow-nav.ts)):
+  - **coleções de cards** (catálogo, trilhos e diário): grades com uma única parada de Tab. As setas seguem as colunas visíveis, Home/End vão às pontas, Enter abre o NFT e Tab alcança as ações do card focado, que fica contornado;
+  - **listas do catálogo e galeria do detalhe:** abas WAI-ARIA;
+  - **demais controles:** carrossel, filtros, quantidade, menu principal, barra inferior, paginação, rodapé e navegação da conta, além de edições (rádio), abas, ordenação e faixa de preço.
 - **Semântica:** labels, `aria-invalid` e `aria-describedby` nos campos ([`Field.tsx`](src/components/common/Field.tsx)); `alt` nas imagens relevantes; estados com texto além da cor.
 - **Feedback acessível** de mutations e tempo real: região `aria-live` ([`announce.tsx`](src/lib/announce.tsx)) e toasts.
 
@@ -274,27 +278,17 @@ Condições de execução:
 
 - **Execução:** configuração versionada ([`lighthouse/config.json`](lighthouse/config.json)) e execução reproduzível (`npm run lighthouse:prod` contra a URL publicada, ou `npm run lighthouse` local).
 - **Resultados** em [`lighthouse/summary.md`](lighthouse/summary.md): mediana de 3 execuções por página e perfil, LCP, CLS e TBT, versões, ambiente, condições, relatórios HTML/JSON e a análise das causas.
-- **Medianas finais (build publicado):** home mobile **92**, home desktop **100**, detalhe mobile **91**, detalhe desktop **100**. Accessibility, Best Practices e SEO **100** em todas. No mobile: LCP ~2,6 s, CLS ≤ 0,003 e TBT de 250 a 275 ms.
-
-### 11. Itens eliminatórios
-
-- **Stack:** usada de fato (seção 2).
-- **Fluxos:** os principais funcionam contra o backend simulado, não são só visuais.
-- **Compra:** só é confirmada pela resposta da simulação (`settle`).
-- **Dados entre usuários:** não há exposição (autorização no servidor, cache por usuário e socket por sessão).
-- **Eventos:** sempre passam pelo `socket.io-client`.
-- **Testes:** 52 testes E2E executáveis.
+- **Medianas (build publicado):** home mobile **92**, home desktop **100**, detalhe mobile **91**, detalhe desktop **100**. Accessibility, Best Practices e SEO **100** em todas. No mobile: LCP ~2,6 s, CLS ≤ 0,003 e TBT de 250 a 275 ms.
 
 ### 12. Entrega
 
-- **Conteúdo:**
-  - código e lockfile (`package-lock.json`);
-  - assets (`public/images`);
-  - mocks e fixtures (`src/mocks`);
-  - testes (`e2e`);
-  - configuração da auditoria (`lighthouse`, `scripts/lighthouse.mjs`).
-- **Deploy:** https://junglenfts.netlify.app, publicado a cada push no `main` ([`netlify.toml`](netlify.toml): build, fallback SPA para acesso direto e refresh, 404 para assets inexistentes e cabeçalhos de segurança).
-- **Documentação:**
-  - este README traz setup, variáveis, credenciais, cenários e reset, comandos e os fluxos de falha;
-  - o [`ARCHITECTURE.md`](ARCHITECTURE.md) traz contratos REST e eventos, sessão, carrinho, cache, reconciliação, limitações, decisões de UX e desvios do Figma.
-- **Comandos:** `dev`, `build`, `preview`, `typecheck`, `lint`, `test:e2e` e `lighthouse`. O projeto roda a partir de um checkout limpo (`npm ci`), sem serviços privados.
+- **Deploy:** https://junglenfts.netlify.app, publicado a partir do `main` ([`netlify.toml`](netlify.toml): fallback SPA para acesso direto e refresh, 404 para assets inexistentes e cabeçalhos de segurança).
+- **Estrutura:**
+  - código em `src/`;
+  - mocks e fixtures em `src/mocks/`;
+  - assets em `public/images/`;
+  - testes em `e2e/`;
+  - auditoria em `lighthouse/` e `scripts/lighthouse.mjs`;
+  - lockfile `package-lock.json`.
+- **Reprodutibilidade:** `npm ci` a partir de um checkout limpo, sem serviços privados (comandos em [Comandos](#comandos)).
+- **Arquitetura e decisões:** [`ARCHITECTURE.md`](ARCHITECTURE.md) traz contratos REST e eventos, sessão, carrinho, cache, reconciliação, limitações, decisões de UX e desvios do Figma.
