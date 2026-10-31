@@ -44,6 +44,17 @@ test('the main flow works with the keyboard alone', async ({ page }) => {
   await expect(page.getByRole('tab', { name: 'Novos lançamentos' })).toBeFocused()
   await page.keyboard.press('Home')
   await expect(page).not.toHaveURL(/tab=/)
+  // Card grid: a single Tab stop; arrows follow the visible columns (3 on desktop, 2 on mobile), Home goes back
+  const results = page.getByRole('list', { name: 'Resultados' })
+  const cards = results.locator('[data-card-link]')
+  await expect(results.locator('[data-card-link][tabindex="0"]')).toHaveCount(1)
+  await cards.first().focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(cards.nth(1)).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(cards.nth(isMobile(page) ? 3 : 4)).toBeFocused()
+  await page.keyboard.press('Home')
+  await expect(cards.first()).toBeFocused()
   // Card → detail with Enter; focus moves to the new page
   await page.getByRole('link', { name: 'Emerald Ape #042', exact: true }).focus()
   await page.keyboard.press('Enter')

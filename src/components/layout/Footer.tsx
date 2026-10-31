@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { CATEGORY_LABEL, type Category } from '@/api/contracts'
 import { FacebookIcon, InstagramIcon, LinkedinIcon, Logo, TwitterIcon, YoutubeIcon } from '@/components/common/Brand'
+import { arrowNav } from '@/lib/arrow-nav'
 import { soon } from '@/lib/utils'
 
 const FEATURES = [
@@ -19,9 +20,10 @@ const SOCIAL = [
 ] as const
 
 const linkCls = 'text-xs text-foreground/90 hover:text-primary'
+const keys = (e: KeyboardEvent<HTMLElement>) => arrowNav(e, { orientation: 'both' }) // arrows move within each link list
 const Soon = ({ label }: { label: string }) => (
   <li>
-    <button type="button" className={linkCls} onClick={() => soon(`“${label}”`)}>{label}</button>
+    <button type="button" data-roving className={linkCls} onClick={() => soon(`“${label}”`)}>{label}</button>
   </li>
 )
 
@@ -83,8 +85,8 @@ export function Footer() {
       <div className="grid grid-cols-2 gap-8 rounded-b-sm bg-card px-6 py-6 lg:grid-cols-4 lg:px-5">
         <nav aria-label="Links do perfil">
           <h2 className="text-sm font-bold">Meu perfil</h2>
-          <ul className="mt-3 space-y-2">
-            <li><Link to="/profile" className={linkCls}>Meu perfil</Link></li>
+          <ul onKeyDown={keys} className="mt-3 space-y-2">
+            <li><Link to="/profile" data-roving className={linkCls}>Meu perfil</Link></li>
             <Soon label="Minha coleção" />
             <Soon label="Atividade" />
             <Soon label="Estúdio do criador" />
@@ -93,16 +95,16 @@ export function Footer() {
         </nav>
         <nav aria-label="Central de ajuda">
           <h2 className="text-sm font-bold">Central de ajuda</h2>
-          <ul className="mt-3 space-y-2">
+          <ul onKeyDown={keys} className="mt-3 space-y-2">
             {['Central de ajuda', 'Como comprar NFTs', 'Carteira e segurança', 'Política do mercado', 'Denunciar item'].map((l) => <Soon key={l} label={l} />)}
           </ul>
         </nav>
         <nav aria-label="Coleções">
           <h2 className="text-sm font-bold">Coleções</h2>
-          <ul className="mt-3 space-y-2">
+          <ul onKeyDown={keys} className="mt-3 space-y-2">
             {(['arte-digital', 'fotografia', 'musica', 'arte-3d', 'utilidade'] as Category[]).map((c) => (
               <li key={c}>
-                <Link to="/" search={{ category: c }} hash="catalogo" className={linkCls}>{CATEGORY_LABEL[c]}</Link>
+                <Link to="/" search={{ category: c }} hash="catalogo" data-roving className={linkCls}>{CATEGORY_LABEL[c]}</Link>
               </li>
             ))}
           </ul>
@@ -110,10 +112,10 @@ export function Footer() {
         <div className="col-span-2 space-y-5 lg:col-span-1">
           <div>
             <h2 className="text-sm font-bold">Redes sociais</h2>
-            <ul className="mt-3 flex flex-wrap gap-2">
+            <ul onKeyDown={keys} className="mt-3 flex flex-wrap gap-2">
               {SOCIAL.map(([label, href, Icon]) => (
                 <li key={label}>
-                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label} (abre em nova aba)`} className="grid size-8 place-items-center rounded-xs border border-primary/70 text-primary hover:bg-primary/10">
+                  <a href={href} target="_blank" rel="noopener noreferrer" data-roving aria-label={`${label} (abre em nova aba)`} className="grid size-8 place-items-center rounded-xs border border-primary/70 text-primary hover:bg-primary/10">
                     <Icon className="size-4" />
                   </a>
                 </li>

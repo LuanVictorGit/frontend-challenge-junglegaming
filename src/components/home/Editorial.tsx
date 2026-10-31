@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { NftImage } from '@/components/common/NftImage'
+import { useCardGrid } from '@/lib/arrow-nav'
 import { soon } from '@/lib/utils'
 
 const PROMOS = [
@@ -35,13 +36,14 @@ export function Promos() {
 }
 
 export function Journal() {
+  const grid = useCardGrid(POSTS.length) // one Tab stop; arrows move between posts
   return (
     <section aria-labelledby="journal" className="container-k defer-paint mt-20">
       <h2 id="journal" className="text-center text-xl font-bold">Diário da Cunhagem</h2>
       <p className="mt-2 text-center text-xs text-sand">Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.</p>
-      <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {POSTS.map((p) => (
-          <li key={p.title}>
+      <ul {...grid.gridProps} className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {POSTS.map((p, i) => (
+          <li key={p.title} {...grid.itemProps(i)}>
             <article className="h-full overflow-hidden rounded-sm bg-card">
               <NftImage image={p.image} alt="" sizes="(min-width: 768px) 280px, 45vw" className="aspect-[3/2]" />
               <div className="space-y-2 p-3">
@@ -50,7 +52,7 @@ export function Journal() {
                 </p>
                 <h3 className="text-sm leading-snug font-bold">{p.title}</h3>
                 <p className="text-[11px] leading-relaxed text-sand">{p.text}</p>
-                <button type="button" onClick={() => soon('O Diário da Cunhagem')} className="text-[11px] font-bold text-primary hover:underline">
+                <button type="button" data-card-link tabIndex={grid.isActive(i) ? 0 : -1} onClick={() => soon('O Diário da Cunhagem')} className="text-[11px] font-bold text-primary hover:underline">
                   Ler mais <span aria-hidden="true">→</span>
                   <span className="sr-only">: {p.title}</span>
                 </button>

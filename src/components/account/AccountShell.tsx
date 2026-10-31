@@ -3,6 +3,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { Download, Heart, LifeBuoy, LogOut, MapPin, ShoppingCart, Tag, User } from 'lucide-react'
 import { useLogout } from '@/api/queries'
 import { MobileTopBar } from '@/components/common/PageBits'
+import { arrowNav } from '@/lib/arrow-nav'
 import { cn, soon } from '@/lib/utils'
 
 // Out-of-scope sections stay visible (Figma) but explain they are unavailable.
@@ -30,16 +31,16 @@ export function AccountShell({ title, hideTitle, children }: { title: string; hi
       <div className="container-k grid grid-cols-[minmax(0,1fr)] gap-8 pt-2 md:grid-cols-[230px_minmax(0,1fr)] md:pt-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
         <nav aria-label="Meu perfil" className="h-fit min-w-0 rounded-sm md:bg-card md:py-3">
           <p className="hidden px-3 pb-2 text-sm font-bold md:block">Meu perfil</p>
-          <ul className="scrollbar-none flex gap-2 overflow-x-auto max-md:-mx-6 max-md:px-6 md:block">
-            <li><Link to="/profile" className={item(pathname === '/profile')} aria-current={pathname === '/profile' ? 'page' : undefined}><User className="size-4" /> Dados do perfil</Link></li>
-            <li><Link to="/wallets" className={item(pathname === '/wallets')} aria-current={pathname === '/wallets' ? 'page' : undefined}><MapPin className="size-4" /> Carteiras</Link></li>
+          <ul onKeyDown={(e) => arrowNav(e, { orientation: 'both' })} className="scrollbar-none flex gap-2 overflow-x-auto max-md:-mx-6 max-md:px-6 md:block">
+            <li><Link to="/profile" data-roving className={item(pathname === '/profile')} aria-current={pathname === '/profile' ? 'page' : undefined}><User className="size-4" /> Dados do perfil</Link></li>
+            <li><Link to="/wallets" data-roving className={item(pathname === '/wallets')} aria-current={pathname === '/wallets' ? 'page' : undefined}><MapPin className="size-4" /> Carteiras</Link></li>
             {SOON.map(([label, Icon]) => (
               <li key={label}>
-                <button type="button" className={item(false)} onClick={() => soon(`A seção “${label}”`)}><Icon className="size-4" /> {label}</button>
+                <button type="button" data-roving className={item(false)} onClick={() => soon(`A seção “${label}”`)}><Icon className="size-4" /> {label}</button>
               </li>
             ))}
             <li className="md:mt-1 md:border-t md:border-border">
-              <button type="button" className={cn(item(false), 'font-bold')} onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut className="size-4" /> Sair</button>
+              <button type="button" data-roving className={cn(item(false), 'font-bold')} onClick={() => logout.mutate()} disabled={logout.isPending}><LogOut className="size-4" /> Sair</button>
             </li>
           </ul>
         </nav>

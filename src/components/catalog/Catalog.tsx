@@ -11,7 +11,7 @@ import { EmptyState, ErrorState } from '@/components/common/States'
 import { NftCard, NftCardSkeleton } from '@/components/nft/NftCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { arrowNav } from '@/lib/arrow-nav'
+import { arrowNav, useCardGrid } from '@/lib/arrow-nav'
 import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
@@ -72,19 +72,19 @@ function Pagination({ page, totalPages }: { page: number; totalPages: number }) 
   const cls = (on?: boolean) => cn('grid size-8 place-items-center rounded-xs border text-xs', on ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:border-primary')
   const to = (n: number) => ({ to: '/' as const, search: (s: HomeSearch) => ({ ...s, page: n === 1 ? undefined : n }), hash: 'catalogo' })
   return (
-    <nav aria-label="Paginação" className="mt-8 flex justify-end gap-2">
+    <nav aria-label="Paginação" onKeyDown={(e) => arrowNav(e)} className="mt-8 flex justify-end gap-2">
       {page > 1 && (
-        <Link {...to(page - 1)} aria-label="Página anterior" className={cls()}>
+        <Link {...to(page - 1)} data-roving aria-label="Página anterior" className={cls()}>
           <ChevronLeft className="size-4" />
         </Link>
       )}
       {pages.map((n) => (
-        <Link key={n} {...to(n)} aria-label={`Página ${n}`} aria-current={n === page ? 'page' : undefined} className={cls(n === page)}>
+        <Link key={n} {...to(n)} data-roving aria-label={`Página ${n}`} aria-current={n === page ? 'page' : undefined} className={cls(n === page)}>
           {n}
         </Link>
       ))}
       {page < totalPages && (
-        <Link {...to(page + 1)} aria-label="Próxima página" className={cls()}>
+        <Link {...to(page + 1)} data-roving aria-label="Próxima página" className={cls()}>
           <ChevronRight className="size-4" />
         </Link>
       )}
@@ -155,6 +155,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
   const params = toListParams(search)
   const list = useQuery(nftListQuery(params))
   const data = useDeferredValue(list.data) // results commit at low priority: the card grid render is time-sliced
+  const grid = useCardGrid(data?.items.length ?? 0)
   const tab = params.tab
   // A page beyond the end (e.g. typed by hand) falls back to the last existing page.
   useEffect(() => {
@@ -227,10 +228,10 @@ export function Catalog({ search }: { search: HomeSearch }) {
             ) : (
               <>
                 {list.isError && <ErrorState className="mb-6 p-4" title="Falha ao atualizar" message={list.error.message} onRetry={() => list.refetch()} />}
-                <ul className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
+                <ul {...grid.gridProps} aria-label="Resultados" className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
                   {data.items.map((n, i) => (
-                    <li key={n.id} className="max-md:even:mt-6">
-                      <NftCard nft={n} priority={i < 3} index={i} />
+                    <li key={n.id} {...grid.itemProps(i)} className="max-md:even:mt-6">
+                      <NftCard nft={n} priority={i < 3} index={i} tabbable={grid.isActive(i)} />
                     </li>
                   ))}
                 </ul>

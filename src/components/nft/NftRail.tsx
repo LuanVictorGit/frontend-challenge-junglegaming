@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { NftSummary } from '@/api/contracts'
+import { useCardGrid } from '@/lib/arrow-nav'
 import { cn } from '@/lib/utils'
 import { NftCard, NftCardSkeleton } from './NftCard'
 
@@ -7,6 +8,7 @@ import { NftCard, NftCardSkeleton } from './NftCard'
 export function NftRail({ title, items, loading }: { title: string; items?: NftSummary[]; loading?: boolean }) {
   const ref = useRef<HTMLUListElement>(null)
   const [page, setPage] = useState(0)
+  const grid = useCardGrid(items?.length ?? 0) // one Tab stop; ←/→ (Home/End) move between cards
   const pages = Math.max(1, Math.ceil((items?.length ?? 0) / 2))
   const go = (i: number) =>
     ref.current?.scrollTo({ left: (ref.current.scrollWidth / pages) * i, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
@@ -18,6 +20,9 @@ export function NftRail({ title, items, loading }: { title: string; items?: NftS
       <h2 id={id} className="border-b border-border pb-3 text-base font-bold text-primary">{title}</h2>
       <ul
         ref={ref}
+        {...grid.gridProps}
+        data-orientation="horizontal"
+        aria-labelledby={id}
         onScroll={(e) => setPage(Math.round((e.currentTarget.scrollLeft / Math.max(1, e.currentTarget.scrollWidth - e.currentTarget.clientWidth)) * (pages - 1)))}
         className="scrollbar-none mt-6 grid snap-x snap-mandatory auto-cols-[45%] grid-flow-col gap-4 overflow-x-auto pb-2 md:auto-cols-[calc((100%-4*1.25rem)/5)] md:gap-5"
       >
@@ -27,9 +32,9 @@ export function NftRail({ title, items, loading }: { title: string; items?: NftS
                 <NftCardSkeleton />
               </li>
             ))
-          : items!.map((n) => (
-              <li key={n.id} className="snap-start">
-                <NftCard nft={n} index={3} sizes="(min-width: 768px) 220px, calc(45vw - 22px)" />
+          : items!.map((n, i) => (
+              <li key={n.id} {...grid.itemProps(i)} className="snap-start">
+                <NftCard nft={n} index={3} sizes="(min-width: 768px) 220px, calc(45vw - 22px)" tabbable={grid.isActive(i)} />
               </li>
             ))}
       </ul>

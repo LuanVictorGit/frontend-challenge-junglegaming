@@ -4,6 +4,7 @@ import { useCart } from '@/api/queries'
 import { Logo } from '@/components/common/Brand'
 import { Button } from '@/components/ui/button'
 import { useSession } from '@/lib/session'
+import { arrowNav } from '@/lib/arrow-nav'
 import { cn, soon } from '@/lib/utils'
 import { SearchDialog } from './SearchDialog'
 
@@ -41,18 +42,18 @@ export function Header() {
             <Logo className="text-sm" />
           </Link>
           <nav aria-label="Principal">
-            <ul className="flex gap-10 text-base">
+            <ul onKeyDown={(e) => arrowNav(e)} className="flex gap-10 text-base">
               <li>
-                <Link to="/" aria-current={loc.pathname === '/' ? 'page' : undefined} className={navCls(loc.pathname === '/')}>Início</Link>
+                <Link to="/" data-roving aria-current={loc.pathname === '/' ? 'page' : undefined} className={navCls(loc.pathname === '/')}>Início</Link>
               </li>
               <li>
-                <Link to="/" hash="catalogo" className={navCls(market)}>Mercado</Link>
+                <Link to="/" hash="catalogo" data-roving className={navCls(market)}>Mercado</Link>
               </li>
               <li>
-                <button type="button" className={navCls(false)} onClick={() => soon('A área de criadores')}>Criadores</button>
+                <button type="button" data-roving className={navCls(false)} onClick={() => soon('A área de criadores')}>Criadores</button>
               </li>
               <li>
-                <button type="button" className={navCls(false)} onClick={() => soon('A área Aprenda')}>Aprenda</button>
+                <button type="button" data-roving className={navCls(false)} onClick={() => soon('A área Aprenda')}>Aprenda</button>
               </li>
             </ul>
           </nav>
