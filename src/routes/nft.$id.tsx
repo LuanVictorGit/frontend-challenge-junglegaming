@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Heart, Mail, ShoppingCart, Star, ZoomIn } from 'lucide-react'
@@ -87,6 +87,7 @@ function Detail({ nft }: { nft: NftDetail }) {
   const [qty, setQty] = useState(1)
   const [view, setView] = useState(0)
   const [zoom, setZoom] = useState(false)
+  const zoomBtn = useRef<HTMLButtonElement>(null)
 
   const edition = nft.editions.find((e) => e.id === editionId)!
   const inCart = cart.data?.items.find((i) => i.nftId === nft.id && i.editionId === editionId)?.qty ?? 0
@@ -133,25 +134,25 @@ function Detail({ nft }: { nft: NftDetail }) {
   )
 
   return (
-    <article className="animate-in fade-in-0 duration-300 ease-spring">
+    <article>
       <MobileTopBar
         action={
           <button type="button" data-testid="favorite" onClick={fav.toggle} aria-pressed={fav.on} aria-label={`Favoritar ${nft.name}`} className="grid size-9 place-items-center rounded-full bg-card text-primary">
-            <Heart className={cn('size-4', fav.on && 'animate-pop fill-primary')} />
+            <Heart className={cn('size-4', fav.on && 'fill-primary', fav.pop && 'animate-pop')} />
           </button>
         }
       />
       <div className="container-k md:pt-5">
         <Breadcrumb items={[{ label: 'Início', to: '/' }, { label: 'Mercado', to: '/' }, { label: nft.name }]} />
-        <div className="md:mt-3 md:grid md:grid-cols-[minmax(0,560px)_1fr] md:gap-10">
+        <div className="md:mt-3 lg:grid lg:grid-cols-[minmax(0,560px)_1fr] lg:gap-10">
           {/* Gallery */}
           <div className="flex flex-col-reverse gap-3 md:flex-row md:items-start">
-            <ul aria-label="Galeria" className="hidden gap-3 md:flex md:flex-col">
+            <ul aria-label="Galeria" className="hidden gap-4 md:flex md:flex-col">
               {VIEWS.map((v, i) => (
                 <li key={v.label}>
-                  <button type="button" onClick={() => setView(i)} aria-label={v.label} aria-pressed={view === i} className={cn('block w-14 overflow-hidden rounded-xs border-2', view === i ? 'border-primary' : 'border-transparent opacity-80 hover:opacity-100')}>
+                  <button type="button" onClick={() => setView(i)} aria-label={v.label} aria-pressed={view === i} className={cn('block w-[100px] overflow-hidden rounded-xs border-2 transition', view === i ? 'border-primary' : 'border-transparent opacity-80 hover:opacity-100')}>
                     <span className="block overflow-hidden">
-                      <NftImage image={nft.image} alt="" sizes="56px" style={v.style} />
+                      <NftImage image={nft.image} alt="" sizes="100px" style={v.style} />
                     </span>
                   </button>
                 </li>
@@ -161,23 +162,23 @@ function Detail({ nft }: { nft: NftDetail }) {
               <div className="overflow-hidden rounded-2xl md:rounded-xl">
                 <NftImage image={nft.image} alt={`${nft.name} — ${VIEWS[view].label.toLowerCase()}`} sizes="(min-width: 768px) 480px, 100vw" priority style={VIEWS[view].style} className="transition-transform duration-300" />
               </div>
-              <button type="button" onClick={() => setZoom(true)} aria-label="Ampliar imagem" className="absolute top-5 right-5 hidden size-8 place-items-center rounded-full bg-background/80 md:grid">
+              <button ref={zoomBtn} type="button" onClick={() => setZoom(true)} aria-label="Ampliar imagem" className="absolute top-5 right-5 hidden size-8 place-items-center rounded-full bg-background/80 md:grid">
                 <ZoomIn className="size-4" />
               </button>
             </div>
           </div>
 
           {/* Info */}
-          <div className="relative z-10 -mt-8 rounded-t-3xl bg-card p-5 md:mt-0 md:rounded-none md:bg-transparent md:p-0">
+          <div className="relative z-10 -mt-8 rounded-t-3xl bg-card p-5 md:mt-8 md:rounded-none md:bg-transparent md:p-0 lg:mt-0">
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-xl font-bold md:text-2xl">{nft.name}</h1>
+              <h1 className="text-xl font-bold md:text-[28px]">{nft.name}</h1>
               <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/60 px-2 py-0.5 text-xs md:hidden">
                 <Star aria-hidden="true" className="size-3 fill-primary text-primary" /> {nft.rating.toFixed(1)}
                 <span className="text-muted-foreground">({nft.reviewCount})</span>
               </span>
             </div>
             <div className="mt-2 hidden flex-wrap items-center justify-between gap-2 md:flex">
-              <Price value={edition.price} compareAt={edition.id === nft.defaultEditionId ? nft.compareAtPrice : null} className="text-lg" />
+              <Price value={edition.price} compareAt={edition.id === nft.defaultEditionId ? nft.compareAtPrice : null} className="text-[22px]" />
               <a href="#avaliacoes" className="inline-flex items-center gap-2 text-xs text-sand hover:text-primary">
                 <Stars rating={nft.rating} /> {nft.reviewCount} avaliações de colecionadores
               </a>
@@ -188,12 +189,12 @@ function Detail({ nft }: { nft: NftDetail }) {
 
             {/* Desktop actions */}
             <div className="mt-4 hidden flex-wrap items-center gap-4 md:flex">
-              <QuantityStepper value={amount} max={Math.max(1, max)} onChange={setQty} label={nft.name} disabled={blocked} className="[&_button]:size-7 [&_button]:rounded-xs" />
+              <QuantityStepper value={amount} max={Math.max(1, max)} onChange={setQty} label={nft.name} disabled={blocked} className="[&_button]:size-8" />
               <Button className="ml-auto h-9 w-36" onClick={() => buy(true)} disabled={blocked || add.isPending}>
                 {soldOut ? 'ESGOTADA' : max === 0 ? 'LIMITE ATINGIDO' : 'COMPRAR'}
               </Button>
               <Button variant="outline" className="h-9" data-testid="favorite" onClick={fav.toggle} aria-pressed={fav.on}>
-                <Heart className={cn(fav.on && 'animate-pop fill-primary')} /> {fav.on ? 'Favoritado' : 'Favoritar'}
+                <Heart className={cn(fav.on && 'fill-primary', fav.pop && 'animate-pop')} /> {fav.on ? 'Favoritado' : 'Favoritar'}
               </Button>
             </div>
             <div className="mt-5">{info}</div>
@@ -227,19 +228,20 @@ function Detail({ nft }: { nft: NftDetail }) {
 
         <Tabs defaultValue="details" className="mt-12" id="avaliacoes">
           <TabsList className="scrollbar-none h-auto w-full justify-start gap-6 overflow-x-auto rounded-none border-b border-border bg-transparent p-0">
-            {[['details', 'Detalhes do NFT'], ['reviews', `Avaliações de colecionadores (${nft.reviewCount})`]].map(([v, l]) => (
+            {[['details', 'Detalhes do NFT', 'Detalhes'], ['reviews', `Avaliações de colecionadores (${nft.reviewCount})`, `Avaliações (${nft.reviewCount})`]].map(([v, l, short]) => (
               <TabsTrigger key={v} value={v} className="flex-none rounded-none border-0 border-b-2 border-transparent px-0 pb-2 text-sm data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
-                {l}
+                <span className="hidden md:inline">{l}</span>
+                <span className="md:hidden">{short}</span>
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="details" className="mt-4 space-y-4 text-xs leading-relaxed text-sand">
+          <TabsContent value="details" className="mt-4 space-y-4 text-xs leading-relaxed text-sand motion-safe:animate-in motion-safe:fade-in-0 duration-200">
             {nft.details.map((p) => <p key={p.slice(0, 24)}>{p}</p>)}
-            <div><h3 className="font-bold text-foreground">Rede:</h3><p>Cunhado na {NETWORK_LABEL[nft.network]} com procedência imutável e metadados armazenados no IPFS.</p></div>
-            <div><h3 className="font-bold text-foreground">Contrato:</h3><p>{shortAddress(nft.contract)} • Contrato inteligente ERC-721 verificado.</p></div>
-            <div><h3 className="font-bold text-foreground">Direitos autorais:</h3><p>Direitos autorais do criador: {nft.royaltyBps / 100}% nas vendas secundárias, pagos automaticamente pelos mercados compatíveis.</p></div>
+            <div><h2 className="font-bold text-foreground">Rede:</h2><p>Cunhado na {NETWORK_LABEL[nft.network]} com procedência imutável e metadados armazenados no IPFS.</p></div>
+            <div><h2 className="font-bold text-foreground">Contrato:</h2><p>{shortAddress(nft.contract)} • Contrato inteligente ERC-721 verificado.</p></div>
+            <div><h2 className="font-bold text-foreground">Direitos autorais:</h2><p>Direitos autorais do criador: {nft.royaltyBps / 100}% nas vendas secundárias, pagos automaticamente pelos mercados compatíveis.</p></div>
           </TabsContent>
-          <TabsContent value="reviews" className="mt-4">
+          <TabsContent value="reviews" className="mt-4 motion-safe:animate-in motion-safe:fade-in-0 duration-200">
             <ul className="space-y-4">
               {nft.reviews.map((r) => (
                 <li key={r.id} className="rounded-sm bg-card p-4">
@@ -257,7 +259,7 @@ function Detail({ nft }: { nft: NftDetail }) {
         </Tabs>
       </div>
       <Dialog open={zoom} onOpenChange={setZoom}>
-        <DialogContent className="max-w-[min(92vw,720px)] bg-card p-3 sm:max-w-[720px]">
+        <DialogContent className="max-w-[min(92vw,720px)] bg-card p-3 sm:max-w-[720px]" onCloseAutoFocus={(e) => (e.preventDefault(), zoomBtn.current?.focus())}>
           <DialogTitle className="sr-only">{nft.name}</DialogTitle>
           <DialogDescription className="sr-only">Imagem ampliada do NFT</DialogDescription>
           <NftImage image={nft.image} alt={nft.name} sizes="720px" className="rounded-md" />
@@ -287,6 +289,8 @@ function DetailSkeleton() {
           <Skeleton className="h-20 w-full" />
         </div>
       </div>
+      <Skeleton className="mt-12 h-8 w-full" />
+      <div className="mt-4 space-y-2">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-4 w-full" />)}</div>
     </div>
   )
 }

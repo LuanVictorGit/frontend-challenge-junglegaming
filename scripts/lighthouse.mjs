@@ -1,6 +1,7 @@
 // Lighthouse audit — 3 runs per page × profile, median per category + LCP/CLS/TBT → lighthouse/summary.{md,json}.
-//   node scripts/lighthouse.mjs                      → local: dist/ served with brotli, mocks on (default scenario)
-//   node scripts/lighthouse.mjs --psi <https://url>   → PageSpeed Insights API against the deployed site
+//   node scripts/lighthouse.mjs                      → local Chromium, dist/ served with brotli (mocks on, default scenario)
+//   node scripts/lighthouse.mjs --url <https://url>   → local Chromium against the deployed site
+//   node scripts/lighthouse.mjs --psi <https://url>   → PageSpeed Insights API (set PSI_API_KEY to avoid the shared quota)
 import { createServer } from 'node:http'
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
 import { extname, join, normalize } from 'node:path'
@@ -15,8 +16,9 @@ import { chromium } from 'playwright'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const cfg = JSON.parse(await readFile(join(root, 'lighthouse/config.json'), 'utf8'))
-const psiIndex = process.argv.indexOf('--psi')
-const psi = psiIndex > 0 ? process.argv[psiIndex + 1]?.replace(/\/$/, '') : null
+const arg = (flag) => (process.argv.includes(flag) ? process.argv[process.argv.indexOf(flag) + 1]?.replace(/\/$/, '') : null)
+const psi = arg('--psi')
+const remote = psi ?? arg('--url')
 const out = join(root, 'lighthouse/reports')
 const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)]
 const retry = async (fn, n = 3) => {
@@ -64,7 +66,8 @@ async function localRun(url, profile) {
 
 async function psiRun(url, profile) {
   const cats = cfg.categories.map((c) => `category=${c.toUpperCase().replace('-', '_')}`).join('&')
-  const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${profile}&${cats}`)
+  const key = process.env.PSI_API_KEY ? `&key=${process.env.PSI_API_KEY}` : ''
+  const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${profile}&${cats}${key}`)
   const json = await res.json()
   if (!res.ok) throw new Error(json.error?.message ?? res.statusText)
   return json.lighthouseResult
@@ -73,8 +76,8 @@ async function psiRun(url, profile) {
 /* ---------- runs ---------- */
 await rm(out, { recursive: true, force: true })
 await mkdir(out, { recursive: true })
-const server = psi ? null : await serveDist()
-const base = psi ?? `http://localhost:${cfg.port}`
+const server = remote ? null : await serveDist()
+const base = remote ?? `http://localhost:${cfg.port}`
 const runs = []
 let env
 
@@ -124,7 +127,7 @@ const meta = {
   environment: psi
     ? { host: 'Google PageSpeed Insights infrastructure', benchmarkIndex: env.benchmarkIndex }
     : { os: `${os.type()} ${os.release()} (${os.arch()})`, cpu: os.cpus()[0]?.model, cores: os.cpus().length, memoryGB: Math.round(os.totalmem() / 2 ** 30), benchmarkIndex: env.benchmarkIndex },
-  conditions: `${psi ? 'Deployed production build (Netlify CDN)' : 'Production build (vite build) served locally with brotli'}; MSW mocks enabled, default scenario; cold load per run; Lighthouse mobile preset (simulated slow 4G, 4x CPU slowdown, Moto G Power viewport) and desktop preset.`,
+  conditions: `${remote ? 'Deployed production build (Netlify CDN)' : 'Production build (vite build) served locally with brotli'}; MSW mocks enabled, default scenario; cold load per run; Lighthouse mobile preset (simulated slow 4G, 4x CPU slowdown, Moto G Power viewport) and desktop preset.`,
 }
 await writeFile(join(root, 'lighthouse/summary.json'), JSON.stringify({ meta, targets: cfg.targets, summary, runs }, null, 2))
 

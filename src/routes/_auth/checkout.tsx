@@ -99,7 +99,7 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
   }, [user.id])
   const form = useForm<Form>({
     resolver: zodResolver(CollectorInput),
-    defaultValues: { displayName: user.displayName, username: user.username, email: user.email, note: '', ...walletFields(wallets[slot]!), ...draft },
+    defaultValues: { displayName: user.displayName, username: user.username, email: user.email, note: '', ...draft, ...walletFields(wallets[slot]!) },
   })
   const values = useWatch({ control: form.control })
   useEffect(() => sessionStorage.setItem(draftKey(user.id), JSON.stringify(values)), [values, user.id])
@@ -112,6 +112,7 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
   const [changes, setChanges] = useState<string[]>([])
   const [stale, setStale] = useState(false)
   const sending = useRef(false) // synchronous guard against double clicks
+  const reviewBtn = useRef<HTMLButtonElement>(null)
   const network = values.network as Network
   const provider = values.walletType as Provider
   const connected = connection?.slot === slot && connection.network === network && connection.provider === provider ? connection : null
@@ -133,7 +134,11 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
       { network, walletSlot: slot },
       {
         onSuccess: (q) => (setReview(q), setStale(false), setChanges([])),
-        onError: (e) => (e instanceof ApiError && e.fields ? applyServerErrors(e.fields, form.setError) : undefined, toast.error(e.message)),
+        onError: (e) => {
+          toast.error(e.message)
+          if (e instanceof ApiError && e.code === 'OUT_OF_STOCK') return void navigate({ to: '/cart' })
+          if (e instanceof ApiError && e.fields) applyServerErrors(e.fields, form.setError)
+        },
       },
     )
   const onReview = form.handleSubmit(() => (connected ? requestQuote() : toast.error('Conecte a carteira selecionada antes de revisar o pedido.')))
@@ -153,6 +158,10 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
             setChanges(d.changes)
             setStale(false)
             announce('Os valores mudaram. Revise e confirme novamente.')
+          } else if (e instanceof ApiError && e.code === 'CONFLICT' && (e.details as { orderId?: string })?.orderId) {
+            // One pending purchase at a time: follow the order already in progress.
+            toast.info(e.message)
+            navigate({ to: '/orders/$id', params: { id: (e.details as { orderId: string }).orderId } })
           } else if (e instanceof ApiError && e.code === 'OUT_OF_STOCK') {
             toast.error(e.message)
             setReview(null)
@@ -182,8 +191,8 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
         </Field>
       </form>
 
-      <aside className="order-1 space-y-8 lg:order-2" aria-label="Resumo e carteira">
-        <section aria-labelledby="my-nfts">
+      <aside className="order-1 flex flex-col gap-8 lg:order-2" aria-label="Resumo e carteira">
+        <section aria-labelledby="my-nfts" className="order-2 lg:order-1">
           <h2 id="my-nfts" className="text-base font-bold">Seus NFTs</h2>
           <p className="mt-2 flex justify-between border-b border-border pb-2 text-xs font-semibold"><span>NFTs</span><span>Subtotal</span></p>
           <ul className="mt-3 space-y-2">
@@ -200,12 +209,12 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
             ))}
           </ul>
           <p className="mt-3 text-center text-xs">
-            Tem um código promocional? <Link to="/cart" className="text-primary hover:underline">Aplique aqui</Link>
+            Tem um código promocional? <Link to="/cart" className="text-primary underline underline-offset-2">Aplique aqui</Link>
           </p>
           <Totals s={cart.summary} estimated className="mt-4" />
         </section>
 
-        <section aria-labelledby="wallet-network" className="space-y-3">
+        <section aria-labelledby="wallet-network" className="order-1 space-y-3 lg:order-2">
           <h2 id="wallet-network" className="text-center text-base font-bold">Carteira e rede</h2>
           <fieldset className="space-y-2">
             <legend className="mb-2 text-xs font-semibold">Carteira conectada</legend>
@@ -226,7 +235,7 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
           </fieldset>
           <fieldset className="space-y-2">
             <legend className="mb-2 text-xs font-semibold">Provedor da carteira</legend>
-            {Provider.options.map((p) => (
+            {(['walletconnect', 'metamask', 'coinbase'] as const).map((p) => (
               <label key={p} className={option}>
                 <span aria-hidden="true" className="grid size-8 place-items-center rounded-full bg-primary/15 text-xs font-bold text-primary">
                   {p === 'coinbase' ? <WalletIcon className="size-4" /> : PROVIDER_LABEL[p][0]}
@@ -249,13 +258,13 @@ function Checkout({ cart, user, wallets, connection }: { cart: Cart; user: User;
           {connect.isError && !connected && <p role="alert" className="text-xs text-destructive">{connect.error.message}</p>}
         </section>
 
-        <Button form="checkout-form" type="submit" size="lg" className="w-full max-md:rounded-full max-md:bg-linear-to-r max-md:from-[#c9864f] max-md:to-[#a96f43]" disabled={quote.isPending}>
+        <Button ref={reviewBtn} form="checkout-form" type="submit" size="lg" className="order-3 w-full max-md:rounded-full max-md:bg-linear-to-r max-md:from-[#c9864f] max-md:to-[#a96f43]" disabled={quote.isPending}>
           {quote.isPending ? 'Calculando cotação…' : 'Revisar pedido'}
         </Button>
       </aside>
 
       <Dialog open={!!review} onOpenChange={(o) => !o && !order.isPending && setReview(null)}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto bg-card sm:max-w-lg">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto bg-card sm:max-w-lg" onCloseAutoFocus={(e) => (e.preventDefault(), reviewBtn.current?.focus())}>
           <DialogTitle>Revise seu pedido</DialogTitle>
           <DialogDescription>
             Valores cotados pela API{review && ` — válidos até ${formatDate(review.expiresAt, { hour: '2-digit', minute: '2-digit' })} (UTC)`}. Nada é cobrado antes da confirmação.

@@ -18,7 +18,7 @@ export function Field({
   children: (p: ControlProps) => ReactNode
 }) {
   const id = useId()
-  const describedBy = [error && `${id}-err`, hint && `${id}-hint`].filter(Boolean).join(' ') || undefined
+  const describedBy = (error ? `${id}-err` : hint ? `${id}-hint` : '') || undefined
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label htmlFor={id} className={cn('text-xs text-foreground', srOnlyLabel && 'sr-only')}>

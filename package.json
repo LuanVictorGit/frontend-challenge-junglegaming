@@ -18,7 +18,8 @@
     "test:e2e:update": "playwright test --update-snapshots",
     "test:e2e:report": "playwright show-report",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "lighthouse:psi": "node scripts/lighthouse.mjs --psi https://junglenfts.netlify.app"
+    "lighthouse:psi": "node scripts/lighthouse.mjs --psi https://junglenfts.netlify.app",
+    "lighthouse:prod": "node scripts/lighthouse.mjs --url https://junglenfts.netlify.app"
   },
   "msw": {
     "workerDirectory": [

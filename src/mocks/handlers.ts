@@ -52,12 +52,21 @@ function openSession(user: DbUser, guestId: string | null) {
   return sessionView(token, user)
 }
 
-// Real image check (magic bytes), not just the declared MIME type.
+// Real image check: decodable base64 whose magic bytes match the declared MIME type.
+const MAGIC: Record<string, RegExp> = { png: /^89504e47/, jpeg: /^ffd8ff/, webp: /^52494646.{8}57454250/ }
 function sniffImage(dataUrl: string) {
+  const invalid = () => new ApiFail(422, 'VALIDATION_ERROR', 'Arquivo de imagem inválido.', { dataUrl: 'Arquivo de imagem inválido' })
+  const type = /^data:image\/(png|jpeg|webp);base64,/.exec(dataUrl)?.[1]
   const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1)
+  if (!type) throw invalid()
   if ((b64.length * 3) / 4 > 1_048_576) throw new ApiFail(422, 'VALIDATION_ERROR', 'Imagem acima de 1 MB.', { dataUrl: 'A imagem deve ter no máximo 1 MB' })
-  const head = [...atob(b64.slice(0, 24))].map((c) => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
-  if (!/^(89504e47|ffd8ff|52494646.{8}57454250)/.test(head)) throw new ApiFail(422, 'VALIDATION_ERROR', 'Arquivo de imagem inválido.', { dataUrl: 'Arquivo de imagem inválido' })
+  let head: string
+  try {
+    head = [...atob(b64.slice(0, 24))].map((c) => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+  } catch {
+    throw invalid()
+  }
+  if (!MAGIC[type].test(head)) throw invalid()
 }
 
 function assertUnique(userId: string | null, email: string, username: string) {
@@ -85,7 +94,7 @@ function route(method: Method, path: string, auth: Auth, fn: (c: Ctx) => unknown
     const url = new URL(request.url)
     const simulated = await simulate(method.toUpperCase(), url.pathname.slice(API.length) + url.search)
     if (simulated) return simulated
-    const headers = auth === 'none' ? undefined : { 'Cache-Control': 'no-store' }
+    const headers = { 'Cache-Control': 'no-store' }
     try {
       const m = /^Bearer ([a-f0-9]{64})$/.exec(request.headers.get('authorization') ?? '')
       const token = m?.[1] ?? (request.headers.has('authorization') ? 'invalid' : null)
@@ -266,8 +275,14 @@ export const handlers = [
   }),
   route('put', '/profile/password', 'required', async ({ user, body, token }) => {
     const d = parse(PasswordInput, body)
-    if (!safeEqual(await hashPassword(d.currentPassword, user!.salt), user!.hash))
+    const key = `pw:${user!.id}`
+    if ((db.attempts[key]?.until ?? 0) > Date.now()) throw new ApiFail(429, 'RATE_LIMITED', 'Muitas tentativas. Aguarde 1 minuto e tente novamente.')
+    if (!safeEqual(await hashPassword(d.currentPassword, user!.salt), user!.hash)) {
+      const count = (db.attempts[key]?.count ?? 0) + 1
+      db.attempts[key] = { count, until: count >= 5 ? Date.now() + 60_000 : 0 }
       throw new ApiFail(422, 'VALIDATION_ERROR', 'Senha atual incorreta.', { currentPassword: 'Senha atual incorreta' })
+    }
+    delete db.attempts[key]
     user!.salt = randomHex(16)
     user!.hash = await hashPassword(d.newPassword, user!.salt)
     // Revoke every other session of this user.

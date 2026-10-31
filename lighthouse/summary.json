@@ -1,20 +1,21 @@
 {
   "meta": {
-    "date": "2026-10-31T13:14:37.587Z",
+    "date": "2026-10-31T13:44:47.464Z",
+    "target": "http://localhost:4174",
     "tools": {
       "lighthouse": "13.6.0",
       "chrome": "Chrome/156.0.0.0",
       "node": "v24.18.0",
-      "playwright": "1.64.1"
+      "runner": "local Chromium (Playwright 1.64.1)"
     },
     "environment": {
       "os": "Windows_NT 10.0.26300 (x64)",
       "cpu": "Intel(R) Core(TM) i5-9400F CPU @ 2.90GHz",
       "cores": 6,
       "memoryGB": 32,
-      "benchmarkIndex": 1627
+      "benchmarkIndex": 1691.5
     },
-    "conditions": "vite build (production) served locally with brotli; MSW mocks enabled, default scenario; fresh storage per run; Lighthouse default mobile (simulated slow 4G, 4x CPU) and desktop presets."
+    "conditions": "Production build (vite build) served locally with brotli; MSW mocks enabled, default scenario; cold load per run; Lighthouse mobile preset (simulated slow 4G, 4x CPU slowdown, Moto G Power viewport) and desktop preset."
   },
   "targets": {
     "performance": 90,
@@ -27,14 +28,14 @@
       "page": "home",
       "profile": "mobile",
       "scores": {
-        "performance": 57,
-        "accessibility": 95,
+        "performance": 77,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 5058,
-      "cls": 0.143,
-      "tbt": 623,
+      "lcp": 4156,
+      "cls": 0,
+      "tbt": 387,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -49,13 +50,13 @@
       "profile": "desktop",
       "scores": {
         "performance": 99,
-        "accessibility": 96,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 885,
-      "cls": 0.002,
-      "tbt": 11,
+      "lcp": 892,
+      "cls": 0,
+      "tbt": 8,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -69,14 +70,14 @@
       "page": "nft-detail",
       "profile": "mobile",
       "scores": {
-        "performance": 67,
-        "accessibility": 99,
+        "performance": 78,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 4574,
+      "lcp": 3841,
       "cls": 0,
-      "tbt": 680,
+      "tbt": 410,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -90,14 +91,14 @@
       "page": "nft-detail",
       "profile": "desktop",
       "scores": {
-        "performance": 98,
+        "performance": 99,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 1082,
+      "lcp": 858,
       "cls": 0,
-      "tbt": 20,
+      "tbt": 4,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -114,14 +115,14 @@
       "profile": "mobile",
       "run": 1,
       "scores": {
-        "performance": 54,
-        "accessibility": 95,
+        "performance": 69,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 6778,
-      "cls": 0.143,
-      "tbt": 566,
+      "lcp": 4920,
+      "cls": 0,
+      "tbt": 425,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -129,22 +130,21 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "home",
       "profile": "mobile",
       "run": 2,
       "scores": {
-        "performance": 61,
-        "accessibility": 95,
+        "performance": 78,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 4934,
-      "cls": 0.143,
-      "tbt": 623,
+      "lcp": 4156,
+      "cls": 0,
+      "tbt": 360,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -152,22 +152,21 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "home",
       "profile": "mobile",
       "run": 3,
       "scores": {
-        "performance": 57,
-        "accessibility": 95,
+        "performance": 77,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 5058,
-      "cls": 0.143,
-      "tbt": 812,
+      "lcp": 4140,
+      "cls": 0,
+      "tbt": 387,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -175,8 +174,7 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "home",
@@ -184,13 +182,13 @@
       "run": 1,
       "scores": {
         "performance": 99,
-        "accessibility": 96,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 872,
-      "cls": 0.002,
-      "tbt": 11,
+      "lcp": 892,
+      "cls": 0,
+      "tbt": 14,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -198,8 +196,7 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     },
     {
       "page": "home",
@@ -207,13 +204,13 @@
       "run": 2,
       "scores": {
         "performance": 99,
-        "accessibility": 96,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 885,
-      "cls": 0.002,
-      "tbt": 17,
+      "lcp": 856,
+      "cls": 0,
+      "tbt": 3,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -221,8 +218,7 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     },
     {
       "page": "home",
@@ -230,13 +226,13 @@
       "run": 3,
       "scores": {
         "performance": 99,
-        "accessibility": 96,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 893,
-      "cls": 0.002,
-      "tbt": 10,
+      "lcp": 896,
+      "cls": 0,
+      "tbt": 8,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -244,22 +240,21 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "mobile",
       "run": 1,
       "scores": {
-        "performance": 70,
-        "accessibility": 99,
+        "performance": 78,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 4495,
+      "lcp": 3850,
       "cls": 0,
-      "tbt": 573,
+      "tbt": 432,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -267,22 +262,21 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "mobile",
       "run": 2,
       "scores": {
-        "performance": 67,
-        "accessibility": 99,
+        "performance": 79,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 4574,
+      "lcp": 3828,
       "cls": 0,
-      "tbt": 680,
+      "tbt": 384,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -290,22 +284,21 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "mobile",
       "run": 3,
       "scores": {
-        "performance": 61,
-        "accessibility": 99,
+        "performance": 78,
+        "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 4764,
+      "lcp": 3841,
       "cls": 0,
-      "tbt": 949,
+      "tbt": 410,
       "throttling": {
         "rttMs": 150,
         "throughputKbps": 1638.4,
@@ -313,22 +306,21 @@
         "downloadThroughputKbps": 1474.5600000000002,
         "uploadThroughputKbps": 675,
         "cpuSlowdownMultiplier": 4
-      },
-      "formFactor": "mobile"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "desktop",
       "run": 1,
       "scores": {
-        "performance": 98,
+        "performance": 99,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 1122,
+      "lcp": 831,
       "cls": 0,
-      "tbt": 66,
+      "tbt": 4,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -336,22 +328,21 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "desktop",
       "run": 2,
       "scores": {
-        "performance": 98,
+        "performance": 99,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 1082,
+      "lcp": 881,
       "cls": 0,
-      "tbt": 20,
+      "tbt": 7,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -359,22 +350,21 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     },
     {
       "page": "nft-detail",
       "profile": "desktop",
       "run": 3,
       "scores": {
-        "performance": 98,
+        "performance": 99,
         "accessibility": 100,
         "best-practices": 100,
         "seo": 100
       },
-      "lcp": 1066,
+      "lcp": 858,
       "cls": 0,
-      "tbt": 19,
+      "tbt": 3,
       "throttling": {
         "rttMs": 40,
         "throughputKbps": 10240,
@@ -382,8 +372,7 @@
         "downloadThroughputKbps": 0,
         "uploadThroughputKbps": 0,
         "cpuSlowdownMultiplier": 1
-      },
-      "formFactor": "desktop"
+      }
     }
   ]
 }

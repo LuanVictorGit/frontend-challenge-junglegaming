@@ -53,9 +53,11 @@ export const useLogin = () => useMutation({ mutationFn: api.auth.login, onSucces
 export const useRegister = () => useMutation({ mutationFn: api.auth.register, onSuccess: useAuthSuccess() })
 export function useLogout() {
   const qc = useQueryClient()
+  const router = useRouter()
   return useMutation({
     mutationFn: () => api.auth.logout().catch(() => undefined),
     onSettled: () => {
+      if (router.state.matches.some((m) => m.routeId.startsWith('/_auth'))) router.navigate({ to: '/' })
       session.set(null)
       clearPrivate(qc)
       for (const k of Object.keys(sessionStorage)) if (k.startsWith('kurio:')) sessionStorage.removeItem(k)

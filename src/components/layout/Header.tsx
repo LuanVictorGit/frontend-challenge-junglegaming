@@ -41,7 +41,7 @@ export function Header() {
             <Logo className="text-sm" />
           </Link>
           <nav aria-label="Principal">
-            <ul className="flex gap-10 text-sm">
+            <ul className="flex gap-10 text-base">
               <li>
                 <Link to="/" aria-current={loc.pathname === '/' ? 'page' : undefined} className={navCls(loc.pathname === '/')}>Início</Link>
               </li>
@@ -69,7 +69,8 @@ export function Header() {
               <CartBadge count={count} />
             </Link>
             {s ? (
-              <Link to="/profile" aria-label={`Meu perfil (${s.user.displayName})`} className="rounded-full">
+              <Link to="/profile" className="rounded-full">
+                <span className="sr-only">Meu perfil</span>
                 <Avatar url={s.user.avatarUrl} name={s.user.displayName} />
               </Link>
             ) : (

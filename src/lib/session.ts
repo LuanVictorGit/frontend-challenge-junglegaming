@@ -45,4 +45,5 @@ export const cartId = {
 }
 
 /** Only same-origin relative paths are accepted as post-login redirects (prevents open redirects). */
-export const safeRedirect = (to?: string | null) => (to && /^\/(?![/\\])/.test(to) ? to : '/')
+export const safeRedirect = (to?: string | null) =>
+  to && /^\/(?![/\\])[^\\]*$/.test(to) && ![...to].some((c) => c.charCodeAt(0) < 32) ? to : '/'

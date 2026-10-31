@@ -116,7 +116,7 @@ export function AuthView({ mode, redirect }: { mode: Mode; redirect?: string }) 
         <Catalog search={{}} />
       </div>
       <Dialog open onOpenChange={(o) => !o && navigate({ to: '/' })}>
-        <DialogContent className="max-h-dvh overflow-y-auto border-0 bg-card p-0 max-md:inset-0 max-md:h-dvh max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none md:max-w-[440px] md:rounded-sm">
+        <DialogContent className="max-h-dvh overflow-y-auto border-0 bg-card p-0 max-md:inset-0 max-md:h-dvh max-md:max-w-none max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none md:max-w-[500px] md:rounded-sm">
           <div className="space-y-5 px-6 pt-16 pb-8 md:px-10 md:pt-10">
             <Logo className="block text-center text-2xl md:hidden" />
             <nav aria-label="Acesso" className="hidden justify-center gap-6 text-base md:flex">
@@ -131,13 +131,13 @@ export function AuthView({ mode, redirect }: { mode: Mode; redirect?: string }) 
             <Social />
             <p className="text-center text-xs md:hidden">
               {mode === 'login' ? (
-                <>Novo na Kurio? <Link to="/register" search={{ redirect }} replace className="text-primary">Crie uma conta</Link></>
+                <>Novo na Kurio? <Link to="/register" search={{ redirect }} replace className="text-primary underline underline-offset-2">Crie uma conta</Link></>
               ) : (
-                <>Já tem conta? <Link to="/login" search={{ redirect }} replace className="text-primary">Entrar</Link></>
+                <>Já tem conta? <Link to="/login" search={{ redirect }} replace className="text-primary underline underline-offset-2">Entrar</Link></>
               )}
             </p>
           </div>
-          <div aria-hidden="true" className="h-2 bg-primary" />
+          <div aria-hidden="true" className="hidden h-2 bg-primary md:block" />
         </DialogContent>
       </Dialog>
     </>

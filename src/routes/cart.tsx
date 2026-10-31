@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatEth } from '@/lib/eth'
 import { useSession } from '@/lib/session'
+import { useMedia } from '@/lib/use-media'
 
 export const Route = createFileRoute('/cart')({ component: CartPage })
 
@@ -54,6 +55,7 @@ function CartPage() {
 }
 
 function Items({ cart }: { cart: Cart }) {
+  const desktop = useMedia('(min-width: 768px)')
   const update = useUpdateCartItem()
   const remove = useRemoveCartItem()
   const busy = (i: CartItem) => (update.isPending && update.variables?.id === i.id) || (remove.isPending && remove.variables === i.id)
@@ -70,7 +72,8 @@ function Items({ cart }: { cart: Cart }) {
   return (
     <section aria-label="Itens do carrinho">
       {/* Desktop table (Figma: Desktop / Carrinho de NFTs) */}
-      <table className="hidden w-full border-separate border-spacing-y-2 md:table">
+      {desktop ? (
+      <table className="w-full border-separate border-spacing-y-2">
         <thead>
           <tr className="text-left text-xs font-semibold">
             <th className="border-b border-border pb-2 font-semibold">NFTs</th>
@@ -101,12 +104,13 @@ function Items({ cart }: { cart: Cart }) {
           ))}
         </tbody>
       </table>
-      {/* Mobile cards (Figma: Mobile / Carrinho de NFTs) */}
-      <ul className="space-y-4 md:hidden">
+      ) : (
+      /* Mobile cards (Figma: Mobile / Carrinho de NFTs) */
+      <ul className="space-y-4">
         {cart.items.map((i) => (
           <li key={i.id} className="flex animate-in overflow-hidden rounded-2xl bg-card fade-in-0 slide-in-from-bottom-2 duration-300 ease-spring" data-testid="cart-row">
-            <NftImage image={i.image} alt="" sizes="96px" className="w-24 shrink-0" />
-            <div className="flex flex-1 items-center gap-2 p-3">
+            <NftImage image={i.image} alt="" sizes="80px" className="w-20 shrink-0" />
+            <div className="flex min-w-0 flex-1 items-center gap-2 p-3">
               <div className="min-w-0 flex-1 space-y-1">
                 <Link to="/nft/$id" params={{ id: i.nftId }} className="block truncate text-sm font-bold">{i.name}</Link>
                 <p className="text-xs text-muted-foreground">Edição: {i.editionLabel}</p>
@@ -121,6 +125,7 @@ function Items({ cart }: { cart: Cart }) {
           </li>
         ))}
       </ul>
+      )}
     </section>
   )
 }
@@ -129,10 +134,11 @@ function CartSummary({ cart }: { cart: Cart }) {
   const s = useSession()
   const navigate = useNavigate()
   const blocked = cart.items.some((i) => !i.available)
+  const desktop = useMedia('(min-width: 768px)')
   return (
     <section aria-labelledby="summary-title" className="h-fit space-y-5 rounded-t-3xl bg-card p-5 md:rounded-sm lg:bg-transparent lg:p-0">
       <h2 id="summary-title" className="hidden border-b border-border pb-3 text-base font-bold md:block">Resumo da carteira</h2>
-      <CouponForm cart={cart} />
+      <CouponForm cart={cart} pill={!desktop} />
       <Totals s={cart.summary} estimated />
       {blocked && <p role="alert" className="text-xs text-destructive">Ajuste os itens indisponíveis para continuar.</p>}
       <Button

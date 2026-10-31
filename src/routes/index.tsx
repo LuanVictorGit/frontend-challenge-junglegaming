@@ -4,6 +4,7 @@ import { Catalog, HomeSearch, MobileSearchBar, toListParams } from '@/components
 import { useTitle } from '@/components/common/PageBits'
 import { Journal, Promos } from '@/components/home/Editorial'
 import { Hero } from '@/components/home/Hero'
+import { useMedia } from '@/lib/use-media'
 
 export const Route = createFileRoute('/')({
   validateSearch: HomeSearch,
@@ -19,9 +20,10 @@ export const Route = createFileRoute('/')({
 function Home() {
   const search = Route.useSearch()
   useTitle('')
+  const desktop = useMedia('(min-width: 768px)')
   return (
     <>
-      <MobileSearchBar search={search} />
+      {!desktop && <MobileSearchBar search={search} />}
       <Hero />
       <Catalog search={search} />
       <Promos />

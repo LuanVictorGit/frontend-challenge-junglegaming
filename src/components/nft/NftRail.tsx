@@ -8,7 +8,8 @@ export function NftRail({ title, items, loading }: { title: string; items?: NftS
   const ref = useRef<HTMLUListElement>(null)
   const [page, setPage] = useState(0)
   const pages = Math.max(1, Math.ceil((items?.length ?? 0) / 2))
-  const go = (i: number) => ref.current?.scrollTo({ left: (ref.current.scrollWidth / pages) * i, behavior: 'smooth' })
+  const go = (i: number) =>
+    ref.current?.scrollTo({ left: (ref.current.scrollWidth / pages) * i, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   const id = title.toLowerCase().replace(/\W+/g, '-')
 
   if (!loading && !items?.length) return null

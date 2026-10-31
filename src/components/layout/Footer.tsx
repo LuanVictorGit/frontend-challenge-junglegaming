@@ -81,7 +81,7 @@ export function Footer() {
         <a href="tel:+551140028922" className="hover:text-primary">+55 11 4002 8922</a>
       </div>
       <div className="grid grid-cols-2 gap-8 rounded-b-sm bg-card px-6 py-6 lg:grid-cols-4 lg:px-5">
-        <nav aria-label="Meu perfil">
+        <nav aria-label="Links do perfil">
           <h2 className="text-sm font-bold">Meu perfil</h2>
           <ul className="mt-3 space-y-2">
             <li><Link to="/profile" className={linkCls}>Meu perfil</Link></li>

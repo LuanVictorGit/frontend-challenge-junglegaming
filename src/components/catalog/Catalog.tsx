@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
 import { toWei } from '@/lib/eth'
+import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
 /* ---------- URL state: search, filters, sort and pagination survive refresh/history ---------- */
@@ -21,8 +22,8 @@ export const HomeSearch = z.object({
   q: z.string().trim().max(60).optional().catch(undefined),
   category: Category.optional().catch(undefined),
   network: Network.optional().catch(undefined),
-  minPrice: EthAmount.optional().catch(undefined),
-  maxPrice: EthAmount.optional().catch(undefined),
+  minPrice: z.coerce.string().pipe(EthAmount).optional().catch(undefined),
+  maxPrice: z.coerce.string().pipe(EthAmount).optional().catch(undefined),
   tab: Tab.optional().catch(undefined),
   sort: Sort.optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(500).optional().catch(undefined),
@@ -66,7 +67,7 @@ function PriceRange({ search, bounds, set }: { search: HomeSearch; bounds?: [str
         valueText={(c) => `${fromCents(c)} ETH`}
       />
       <p className="text-xs" aria-live="polite">
-        Preço: {fromCents(v[0])} - {fromCents(v[1])} ETH
+        Preço: {fromCents(v[0]).replace('.', ',')} - {fromCents(v[1]).replace('.', ',')} ETH
       </p>
       <Button size="sm" className="h-7 px-3" onClick={() => set({ minPrice: v[0] > min ? fromCents(v[0]) : undefined, maxPrice: v[1] < max ? fromCents(v[1]) : undefined })}>
         Aplicar
@@ -141,8 +142,8 @@ function Featured() {
   const f = data?.featured
   return (
     <section aria-labelledby="featured" className="mt-8 overflow-hidden rounded-sm bg-card">
-      <h2 id="featured" className="px-3 pt-4 text-lg font-bold text-primary">NFT EM DESTAQUE</h2>
-      <p className="text-center text-sm font-bold">OFERTA LIMITADA</p>
+      <h2 id="featured" className="px-5 pt-5 text-2xl font-bold text-primary">NFT EM DESTAQUE</h2>
+      <p className="mt-1 text-center text-xl font-bold">OFERTA LIMITADA</p>
       {isPending ? (
         <Skeleton className="mt-3 aspect-square w-full rounded-xl" />
       ) : (
@@ -160,7 +161,7 @@ function Pagination({ page, totalPages }: { page: number; totalPages: number }) 
   if (totalPages <= 1) return null
   const start = Math.max(1, Math.min(page - 1, totalPages - 3))
   const pages = Array.from({ length: Math.min(4, totalPages) }, (_, i) => start + i)
-  const cls = (on?: boolean) => cn('grid size-7 place-items-center rounded-xs border text-xs', on ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:border-primary')
+  const cls = (on?: boolean) => cn('grid size-8 place-items-center rounded-xs border text-xs', on ? 'border-primary bg-primary text-primary-foreground' : 'border-border hover:border-primary')
   const to = (n: number) => ({ to: '/' as const, search: (s: HomeSearch) => ({ ...s, page: n === 1 ? undefined : n }), hash: 'catalogo' })
   return (
     <nav aria-label="Paginação" className="mt-8 flex justify-end gap-2">
@@ -239,18 +240,28 @@ export function MobileSearchBar({ search }: { search: HomeSearch }) {
 
 export function Catalog({ search }: { search: HomeSearch }) {
   const set = useSetSearch()
+  const navigate = useNavigate()
+  const desktop = useMedia('(min-width: 768px)')
   const params = toListParams(search)
   const list = useQuery(nftListQuery(params))
   const data = list.data
   const tab = params.tab
+  // A page beyond the end (e.g. typed by hand) falls back to the last existing page.
+  useEffect(() => {
+    if (data && data.total > 0 && data.page > data.totalPages)
+      navigate({ to: '/', search: (s: HomeSearch) => ({ ...s, page: data.totalPages > 1 ? data.totalPages : undefined }), replace: true })
+  }, [data, navigate])
   return (
-    <section id="catalogo" aria-label="Catálogo de NFTs" className="container-k mt-8 scroll-mt-4 md:mt-16 md:grid md:grid-cols-[260px_1fr] md:gap-8 lg:grid-cols-[310px_1fr] lg:gap-12">
-      <aside className="hidden md:block" aria-label="Filtros">
-        <div className="rounded-sm bg-card p-5">
-          <Filters search={search} facets={data?.facets} set={set} />
-        </div>
-        <Featured />
-      </aside>
+    <section id="catalogo" aria-labelledby="catalog-title" className="container-k mt-8 scroll-mt-4 md:mt-16 md:grid md:grid-cols-[260px_1fr] md:gap-8 lg:grid-cols-[310px_1fr] lg:gap-12">
+      <h2 id="catalog-title" className="sr-only">Catálogo de NFTs</h2>
+      {desktop && (
+        <aside aria-label="Filtros">
+          <div className="rounded-sm bg-card p-5">
+            <Filters search={search} facets={data?.facets} set={set} />
+          </div>
+          <Featured />
+        </aside>
+      )}
       <div className="min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div role="group" aria-label="Listas" className="scrollbar-none flex gap-4 overflow-x-auto text-sm whitespace-nowrap">

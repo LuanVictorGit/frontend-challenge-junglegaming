@@ -14,16 +14,11 @@ const SLIDES = [
 
 function Dots({ i, set, className }: { i: number; set: (n: number) => void; className?: string }) {
   return (
-    <div className={cn('flex gap-2', className)}>
+    <div className={cn('flex', className)}>
       {SLIDES.map((s, n) => (
-        <button
-          key={s.image}
-          type="button"
-          onClick={() => set(n)}
-          aria-label={`Destaque ${n + 1} de ${SLIDES.length}`}
-          aria-current={n === i}
-          className={cn('size-2 rounded-full bg-primary transition-opacity', n === i ? 'opacity-100' : 'opacity-50 hover:opacity-80')}
-        />
+        <button key={s.image} type="button" onClick={() => set(n)} aria-label={`Destaque ${n + 1} de ${SLIDES.length}`} aria-current={n === i} className="group grid size-6 place-items-center">
+          <span className={cn('h-2 rounded-full bg-primary transition-all duration-300 ease-spring', n === i ? 'w-5 opacity-100' : 'w-2 opacity-50 group-hover:opacity-80')} />
+        </button>
       ))}
     </div>
   )
@@ -41,20 +36,20 @@ export function Hero() {
     <section aria-roledescription="carrossel" aria-label="Destaques da Kurio" className="container-k">
       {/* Desktop (Figma: Desktop / Início) */}
       {desktop ? (
-      <div className="grid grid-cols-[1fr_450px] items-center gap-10 py-12">
+      <div className="grid grid-cols-[1fr_320px] items-center gap-8 py-10 lg:grid-cols-[1fr_450px] lg:gap-10">
         <div className="relative flex h-full flex-col justify-center lg:pl-10">
           <p className="text-base">Bem-vindo à Kurio</p>
-          <h1 key={i} className={`mt-5 max-w-[600px] text-[40px] leading-[1.45] font-bold tracking-wide uppercase lg:text-[48px] ${fx} slide-in-from-left-2`}>{s.title}</h1>
+          <h1 key={i} className={`mt-5 max-w-[600px] text-[32px] leading-[1.45] font-bold uppercase lg:text-[44px] lg:leading-[70px] ${fx} slide-in-from-left-2`}>{s.title}</h1>
           <p className="mt-3 max-w-[570px] text-[15px] leading-6 text-sand">
             Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte digital rara, apoie artistas e tenha uma parte da cultura da internet.
           </p>
-          <Button asChild size="lg" className="mt-9 w-[140px] text-base font-bold">
+          <Button asChild className="mt-9 h-10 w-[140px] text-base font-bold">
             <a href="#catalogo">EXPLORAR</a>
           </Button>
           <Dots i={i} set={go} className="absolute right-0 bottom-0" />
         </div>
         <div className="overflow-hidden rounded-2xl">
-          <NftImage key={i} image={s.image} alt={s.alt} sizes="450px" priority={i === 0} className={`${fx} zoom-in-[1.04]`} />
+          <NftImage key={i} image={s.image} alt={s.alt} sizes="(min-width: 1024px) 450px, 320px" priority={i === 0} className={`${fx} zoom-in-[1.04]`} />
         </div>
       </div>
       ) : (

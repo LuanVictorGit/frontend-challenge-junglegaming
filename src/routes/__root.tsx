@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { LiveRegion } from '@/lib/announce'
 import { startRealtime } from '@/lib/realtime'
+import { useMedia } from '@/lib/use-media'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: Root,
@@ -34,6 +35,7 @@ function Root() {
     setPrev(pathname)
     setAnimate(true)
   }
+  const desktop = useMedia('(min-width: 768px)') // mount only the visible chrome
   useEffect(() => startRealtime(qc), [qc])
   // Move focus to the new page on route changes (not on search-param changes).
   useEffect(() => {
@@ -47,14 +49,14 @@ function Root() {
       <a href="#main" className="sr-only z-50 rounded-sm bg-primary px-3 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
         Pular para o conteúdo
       </a>
-      <Header />
+      {desktop && <Header />}
       <main id="main" ref={main} tabIndex={-1} className="min-h-dvh outline-none">
-        <div key={pathname} className={animate ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-500 ease-spring' : undefined}>
+        <div key={pathname} className={animate ? 'motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-1.5 duration-300 ease-spring' : undefined}>
           <Outlet />
         </div>
       </main>
       <Footer />
-      <MobileNav />
+      {!desktop && <MobileNav />}
       <Toaster position="top-center" closeButton mobileOffset={{ top: 64 }} />
       <LiveRegion />
       <SessionWatcher />

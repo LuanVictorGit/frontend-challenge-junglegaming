@@ -33,7 +33,7 @@ function OrderPage() {
       ) : o!.status === 'confirmed' ? (
         <Receipt o={o!} />
       ) : (
-        <Status o={o!} />
+        <Status key={o!.status} o={o!} />
       )}
     </div>
   )
@@ -74,7 +74,7 @@ const ThankYou = () => (
 /** Receipt rendered only from the order snapshot (later catalog changes never alter it). */
 function Receipt({ o }: { o: Order }) {
   return (
-    <section aria-labelledby="receipt-title" className="relative mx-auto max-w-[520px] animate-in overflow-hidden rounded-sm bg-card fade-in-0 zoom-in-95 slide-in-from-bottom-4 duration-500 ease-spring" data-testid="order-confirmed">
+    <section aria-labelledby="receipt-title" className="relative mx-auto max-w-[578px] overflow-hidden rounded-sm bg-card duration-400 ease-spring motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:slide-in-from-bottom-4" data-testid="order-confirmed">
       <Link to="/" aria-label="Fechar e voltar ao início" className="absolute top-3 right-3 text-primary hover:text-foreground">
         <X className="size-4" />
       </Link>
@@ -127,7 +127,7 @@ function Receipt({ o }: { o: Order }) {
         <div className="mt-4 text-center">
           {/* Simulated explorer link (fake transaction hash from the mock backend). */}
           <Button asChild size="sm">
-            <a href={`https://etherscan.io/tx/${o.txHash}`} target="_blank" rel="noopener noreferrer">Ver no Etherscan<span className="sr-only"> (simulado, nova aba)</span></a>
+            <a href={`https://etherscan.io/tx/${encodeURIComponent(o.txHash ?? '')}`} target="_blank" rel="noopener noreferrer">Ver no Etherscan<span className="sr-only"> (simulado, nova aba)</span></a>
           </Button>
         </div>
       </div>

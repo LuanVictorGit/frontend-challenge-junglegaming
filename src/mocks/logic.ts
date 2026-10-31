@@ -125,8 +125,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export function getCart(key: string): DbCart {
   return (db.carts[key] ??= { id: key.startsWith('g:') ? key.slice(2) : crypto.randomUUID(), lines: [], coupon: null, version: 1 })
 }
-/** Guest carts are keyed by an unguessable server-issued UUID (X-Cart-Id header). */
-export const guestCart = (id: string | null) => getCart(`g:${id && UUID.test(id) ? id : crypto.randomUUID()}`)
+/** Guest carts are keyed by an unguessable server-issued UUID (X-Cart-Id header); unknown ids are ignored. */
+export const guestCart = (id: string | null) => getCart(id && UUID.test(id) && db.carts[`g:${id}`] ? `g:${id}` : `g:${crypto.randomUUID()}`)
 
 export function cartView(c: DbCart): Cart {
   const items: CartItem[] = []
@@ -239,6 +239,8 @@ export function createOrder(userId: string, input: CreateOrderInput, key: string
     if (prev.hash !== hash) throw new ApiFail(409, 'IDEMPOTENCY_CONFLICT', 'Esta tentativa de compra já foi usada com outro conteúdo.')
     return { order: db.orders.find((o) => o.id === prev.orderId)!, replay: true }
   }
+  const pending = db.orders.find((o) => o.userId === userId && o.status === 'pending')
+  if (pending) throw new ApiFail(409, 'CONFLICT', 'Você já tem um pedido aguardando confirmação.', undefined, { orderId: pending.id })
   const quoted = db.quotes[input.quoteId]
   if (!quoted || quoted.userId !== userId) throw new ApiFail(404, 'NOT_FOUND', 'Cotação não encontrada. Revise o pedido novamente.')
   // Never trust the earlier quote: revalidate price, availability, coupon and fees right now.
