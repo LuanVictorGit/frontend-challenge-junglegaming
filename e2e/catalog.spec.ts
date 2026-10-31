@@ -39,7 +39,7 @@ test('search, filters, sort and pagination live in the URL and survive history/r
   await expect(page).toHaveURL(/page=2/)
   await expect(page.getByTestId('nft-card').first()).not.toHaveText(pageOneFirst) // placeholder replaced
   const pageTwoFirst = await page.getByTestId('nft-card').first().textContent()
-  await page.getByRole('button', { name: 'Em alta', exact: true }).click()
+  await page.getByRole('tab', { name: 'Em alta' }).click()
   await expect(page).toHaveURL(/tab=trending/)
   await expect(page).not.toHaveURL(/page=/)
 

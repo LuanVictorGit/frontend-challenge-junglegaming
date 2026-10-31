@@ -11,6 +11,7 @@ import { EmptyState, ErrorState } from '@/components/common/States'
 import { NftCard, NftCardSkeleton } from '@/components/nft/NftCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { arrowNav } from '@/lib/arrow-nav'
 import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
@@ -176,12 +177,18 @@ export function Catalog({ search }: { search: HomeSearch }) {
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div role="group" aria-label="Listas" className="scrollbar-none flex gap-4 overflow-x-auto text-sm whitespace-nowrap">
+            {/* WAI-ARIA tabs: one Tab stop, ←/→ (Home/End) switch lists; the results below are the tab panel */}
+            <div role="tablist" aria-label="Listas" onKeyDown={(e) => arrowNav(e, { select: true })} className="scrollbar-none flex gap-4 overflow-x-auto text-sm whitespace-nowrap">
               {TABS.map(([t, label]) => (
                 <button
                   key={t}
                   type="button"
-                  aria-pressed={tab === t}
+                  role="tab"
+                  data-roving
+                  id={`list-${t}`}
+                  aria-selected={tab === t}
+                  aria-controls="catalog-results"
+                  tabIndex={tab === t ? 0 : -1}
                   onClick={() => set({ tab: t === 'all' ? undefined : t })}
                   className={cn('border-b-2 pb-1 transition-[color,border-color] duration-200', tab === t ? 'border-primary font-semibold text-primary' : 'border-transparent hover:text-primary')}
                 >
@@ -198,7 +205,7 @@ export function Catalog({ search }: { search: HomeSearch }) {
           <p className="sr-only" aria-live="polite">
             {data && !list.isFetching ? `${data.total} NFTs encontrados. Página ${data.page} de ${data.totalPages}.` : ''}
           </p>
-          <div aria-busy={list.isFetching} className={cn('mt-6 transition-opacity duration-300 ease-spring', list.isPlaceholderData && 'opacity-60')}>
+          <div id="catalog-results" role="tabpanel" aria-labelledby={`list-${tab}`} aria-busy={list.isFetching} className={cn('mt-6 transition-opacity duration-300 ease-spring', list.isPlaceholderData && 'opacity-60')}>
             {!data && !list.isError ? (
               <div className="grid grid-cols-2 gap-x-3 gap-y-6 md:gap-x-5 lg:grid-cols-3 lg:gap-x-[34px] lg:gap-y-8">
                 {Array.from({ length: PAGE_SIZE }, (_, i) => (

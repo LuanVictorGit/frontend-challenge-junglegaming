@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Slider } from '@/components/ui/slider'
+import { arrowNav } from '@/lib/arrow-nav'
 import { toWei } from '@/lib/eth'
 import { cn } from '@/lib/utils'
 import type { HomeSearch, SetSearch } from './Catalog'
@@ -45,11 +46,12 @@ function PriceRange({ search, bounds, set }: { search: HomeSearch; bounds?: [str
   )
 }
 
+// ↑/↓ (Home/End) move between the options of a filter group; Enter/Space toggles.
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <fieldset className="mt-6 first:mt-0">
       <legend className="text-base font-bold">{title}</legend>
-      <div className="mt-3 space-y-0.5">{children}</div>
+      <div onKeyDown={(e) => arrowNav(e, { orientation: 'vertical' })} className="mt-3 space-y-0.5">{children}</div>
     </fieldset>
   )
 }
@@ -58,6 +60,7 @@ function Item({ label, count, active, onClick }: { label: string; count?: number
   return (
     <button
       type="button"
+      data-roving
       onClick={onClick}
       aria-pressed={active}
       className={cn('flex w-full items-center justify-between rounded-xs px-3 py-2 text-left text-sm transition hover:bg-accent/60', active ? 'text-primary' : 'text-sand')}

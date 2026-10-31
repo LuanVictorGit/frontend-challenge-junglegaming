@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { NftImage } from '@/components/common/NftImage'
 import { Button } from '@/components/ui/button'
+import { arrowNav } from '@/lib/arrow-nav'
 import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
@@ -12,11 +13,12 @@ const SLIDES = [
   { image: 'golden', title: 'Apoie criadores e a nova cultura', short: 'Apoie novos criadores', alt: 'Golden Beat: orangotango com fones de ouvido' },
 ]
 
+// Slide picker: ←/→ (Home/End) move between slides, like the dots under the Figma hero.
 function Dots({ i, set, className }: { i: number; set: (n: number) => void; className?: string }) {
   return (
-    <div className={cn('flex', className)}>
+    <div role="group" aria-label="Escolher destaque" onKeyDown={(e) => arrowNav(e, { select: true })} className={cn('flex', className)}>
       {SLIDES.map((s, n) => (
-        <button key={s.image} type="button" onClick={() => set(n)} aria-label={`Destaque ${n + 1} de ${SLIDES.length}`} aria-current={n === i} className="group grid size-6 place-items-center">
+        <button key={s.image} type="button" data-roving onClick={() => set(n)} aria-label={`Destaque ${n + 1} de ${SLIDES.length}`} aria-current={n === i} className="group grid size-6 place-items-center">
           <span className={cn('h-2 rounded-full bg-primary transition-all duration-300 ease-spring', n === i ? 'w-5 opacity-100' : 'w-2 opacity-50 group-hover:opacity-80')} />
         </button>
       ))}

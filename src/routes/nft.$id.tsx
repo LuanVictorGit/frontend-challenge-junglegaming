@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatEth } from '@/lib/eth'
+import { arrowNav } from '@/lib/arrow-nav'
 import { useMedia } from '@/lib/use-media'
 import { cn, formatDate, shortAddress } from '@/lib/utils'
 
@@ -156,19 +157,30 @@ function Detail({ nft }: { nft: NftDetail }) {
           {/* Gallery */}
           <div className="flex flex-col-reverse gap-3 md:flex-row md:items-start">
             {desktop && (
-              <ul aria-label="Galeria" className="flex flex-col gap-4">
+              // Gallery views as WAI-ARIA tabs: one Tab stop, ↑/↓ (or ←/→, Home/End) switch the view shown in the panel
+              <div role="tablist" aria-label="Galeria" aria-orientation="vertical" onKeyDown={(e) => arrowNav(e, { orientation: 'both', select: true })} className="flex flex-col gap-4">
                 {VIEWS.map((v, i) => (
-                  <li key={v.label}>
-                    <button type="button" onClick={() => setView(i)} aria-label={v.label} aria-pressed={view === i} className={cn('block w-[100px] overflow-hidden rounded-xs border-2 transition', view === i ? 'border-primary' : 'border-transparent opacity-80 hover:opacity-100')}>
-                      <span className="block overflow-hidden">
-                        <NftImage image={nft.image} alt="" sizes="100px" style={v.style} />
-                      </span>
-                    </button>
-                  </li>
+                  <button
+                    key={v.label}
+                    type="button"
+                    role="tab"
+                    data-roving
+                    id={`view-${i}`}
+                    aria-controls="nft-view"
+                    aria-selected={view === i}
+                    tabIndex={view === i ? 0 : -1}
+                    onClick={() => setView(i)}
+                    aria-label={v.label}
+                    className={cn('block w-[100px] overflow-hidden rounded-xs border-2 transition', view === i ? 'border-primary' : 'border-transparent opacity-80 hover:opacity-100')}
+                  >
+                    <span className="block overflow-hidden">
+                      <NftImage image={nft.image} alt="" sizes="100px" style={v.style} />
+                    </span>
+                  </button>
                 ))}
-              </ul>
+              </div>
             )}
-            <div className="relative flex-1 overflow-hidden rounded-2xl md:rounded-sm md:bg-tile md:p-3">
+            <div {...(desktop && { id: 'nft-view', role: 'tabpanel', 'aria-labelledby': `view-${view}` })} className="relative flex-1 overflow-hidden rounded-2xl md:rounded-sm md:bg-tile md:p-3">
               <div className="overflow-hidden rounded-2xl md:rounded-xl">
                 <NftImage image={nft.image} alt={`${nft.name} — ${VIEWS[view].label.toLowerCase()}`} sizes="(min-width: 768px) 480px, calc(100vw - 48px)" priority style={VIEWS[view].style} className="transition-transform duration-300" />
               </div>
