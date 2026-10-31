@@ -29,8 +29,9 @@ npm run dev                       # http://localhost:5173 com mocks
 | `npm run test:e2e` | Playwright (build + preview automáticos; desktop 1440 e mobile 390) |
 | `npm run test:e2e:update` | Regenera as baselines de regressão visual |
 | `npm run test:e2e:report` | Abre o relatório HTML (traces das falhas em `test-results/`) |
-| `npm run lighthouse` | Auditoria local do build (3 execuções × página × perfil, mediana) |
-| `npm run lighthouse:psi` | Mesma auditoria via PageSpeed Insights contra a URL publicada |
+| `npm run lighthouse` | Lighthouse local sobre o build (3 execuções × página × perfil, mediana, relatórios HTML/JSON) |
+| `npm run lighthouse:prod` | O mesmo Lighthouse local contra a URL publicada |
+| `npm run lighthouse:psi` | PageSpeed Insights via API (requer `PSI_API_KEY`; sem chave a cota anônima esgota rápido) |
 
 ## Variáveis de ambiente
 
@@ -90,4 +91,4 @@ Controle fino pelo console do navegador (o mesmo usado pelos testes): `window.__
 
 ## Auditoria de performance
 
-Configuração versionada em `lighthouse/config.json`; resultados (mediana de 3 execuções por página e perfil, com LCP, CLS e TBT, versões e ambiente) em [`lighthouse/summary.md`](lighthouse/summary.md) e relatórios HTML/JSON em `lighthouse/reports/`.
+Configuração versionada em `lighthouse/config.json`. Resultados (mediana de 3 execuções por página e perfil, com LCP, CLS e TBT, versões, ambiente e condições) em [`lighthouse/summary.md`](lighthouse/summary.md), com os relatórios HTML/JSON em `lighthouse/reports/` e a análise dos resultados.

@@ -102,7 +102,7 @@ function ProfileForm({ user }: { user: User }) {
             <Button type="button" size="sm" onClick={() => file.current?.click()} disabled={avatar.isPending} aria-describedby={avatarError ? 'avatar-err' : undefined}>
               {avatar.isPending ? 'Enviando…' : 'Alterar'}
             </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => avatar.mutate(null)} disabled={!user.avatarUrl || avatar.isPending}>Remover</Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => (setAvatarError(undefined), avatar.mutate(null))} disabled={!user.avatarUrl || avatar.isPending}>Remover</Button>
           </div>
           {avatarError && <p id="avatar-err" role="alert" className="text-xs text-destructive">{avatarError}</p>}
         </div>

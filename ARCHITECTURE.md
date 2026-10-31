@@ -84,6 +84,8 @@ Cliente (`src/lib/realtime.ts`): valida cada evento com zod; descarta `id` repet
 - Disponibilidade por NFT **e edição** (`stock`, `maxPerOrder`), validada a cada inclusão ou alteração (`409` com a quantidade disponível). Quantidades são inteiras.
 - Valores em ETH trafegam como strings decimais e são calculados com BigInt em 18 casas (`src/lib/eth.ts`). O cliente nunca envia preços e exibe exatamente o resumo da API (subtotal, desconto, taxa de rede, total).
 - Após a confirmação, o servidor remove do carrinho apenas as quantidades compradas (por NFT + edição). Em recusa, o estoque reservado volta e os itens permanecem.
+- Um pedido pendente por usuário: uma segunda tentativa com outra chave de idempotência (por exemplo, outra aba) recebe `409 CONFLICT` com o `orderId` em andamento, e o cliente segue para ele. Isso evita estoque debitado duas vezes.
+- O servidor só reconhece ids de carrinho de visitante que ele mesmo emitiu; ids desconhecidos geram um carrinho novo.
 
 ## Estado e cache (TanStack Query)
 
@@ -113,7 +115,14 @@ Skip link; foco movido para o conteúdo a cada troca de rota; foco preso e devol
 
 ## Performance
 
-Code splitting por rota; MSW e `socket.io-client` carregados sob demanda, sem bloquear a primeira pintura; imagens WebP responsivas (`srcset/sizes`) com preload da imagem LCP e da fonte; só o layout de hero visível é renderizado; skeletons com dimensões reservadas; animações de entrada não se aplicam à primeira pintura. Resultados e análise em [`lighthouse/summary.md`](lighthouse/summary.md).
+- Code splitting por rota; MSW e `socket.io-client` carregados sob demanda, sem bloquear a primeira pintura.
+- CSS inline no HTML (sem requisição bloqueante); preload da fonte e da imagem LCP; imagens WebP responsivas (320/480/640/960 px com `srcset/sizes`).
+- Só o layout visível é montado (header desktop × navegação mobile, filtros laterais, tabela × lista do carrinho, variantes do hero), evitando imagens ocultas baixadas e trabalho de renderização inútil.
+- `tough-cookie`/`tldts` (usados pelo MSW só para persistir cookies de respostas simuladas, recurso que este mock não usa) são trocados por um shim via alias: o chunk de mocks caiu de 174 KB para 53 KB gzip.
+- Zod em modo `jitless` (sem `new Function`), compatível com a CSP e mais barato para payloads pequenos.
+- Skeletons com dimensões reservadas e `main` com altura mínima (rodapé fora da dobra durante o carregamento: CLS 0); animações de entrada não se aplicam à primeira pintura.
+
+Resultados e análise em [`lighthouse/summary.md`](lighthouse/summary.md).
 
 ## Decisões de UX e desvios do Figma
 
