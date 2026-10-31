@@ -1,20 +1,16 @@
-import { useDeferredValue, useEffect, useState } from 'react'
+import { lazy, Suspense, useDeferredValue, useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
 import { z } from 'zod'
-import { Category, CATEGORY_LABEL, EthAmount, Network, NETWORK_LABEL, Sort, SORT_LABEL, Tab, type NftList } from '@/api/contracts'
+import { Category, EthAmount, Network, Sort, Tab } from '@/api/contracts'
 import { highlightsQuery, nftListQuery } from '@/api/queries'
 import { NftImage } from '@/components/common/NftImage'
 import { Deferred } from '@/components/common/PageBits'
 import { EmptyState, ErrorState } from '@/components/common/States'
 import { NftCard, NftCardSkeleton } from '@/components/nft/NftCard'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Slider } from '@/components/ui/slider'
-import { toWei } from '@/lib/eth'
 import { useMedia } from '@/lib/use-media'
 import { cn } from '@/lib/utils'
 
@@ -34,108 +30,18 @@ export const PAGE_SIZE = 9
 export const toListParams = (s: HomeSearch) => ({ ...s, tab: s.tab ?? 'all', sort: s.sort ?? 'recent', page: s.page ?? 1, pageSize: PAGE_SIZE })
 
 const TABS: [Tab, string][] = [['all', 'Todos os NFTs'], ['new', 'Novos lançamentos'], ['trending', 'Em alta']]
-type Set = (patch: Partial<HomeSearch>) => void
+export type SetSearch = (patch: Partial<HomeSearch>) => void
+
+// Filters, sort and the mobile drawer (Radix Select/Slider/Dialog) load on demand, off the critical path.
+const loadControls = () => import('./CatalogControls')
+const Filters = lazy(() => loadControls().then((m) => ({ default: m.Filters })))
+const SortSelect = lazy(() => loadControls().then((m) => ({ default: m.SortSelect })))
+const FiltersSheet = lazy(() => loadControls().then((m) => ({ default: m.FiltersSheet })))
 
 /** Any filter change resets pagination; each change is a history entry. */
-function useSetSearch(): Set {
+function useSetSearch(): SetSearch {
   const navigate = useNavigate()
   return (patch) => navigate({ to: '/', search: (prev: HomeSearch) => ({ ...prev, ...patch, page: undefined }), resetScroll: false })
-}
-
-/* ---------- price range (integer cents → no float drift) ---------- */
-const toCents = (v: string, up = false) => {
-  const w = toWei(v)
-  const c = w / 10n ** 16n
-  return Number(up && w % 10n ** 16n ? c + 1n : c)
-}
-const fromCents = (c: number) => `${Math.floor(c / 100)}.${String(c % 100).padStart(2, '0')}`
-
-function PriceRange({ search, bounds, set }: { search: HomeSearch; bounds?: [string, string]; set: Set }) {
-  const [min, max] = bounds ? [toCents(bounds[0]), toCents(bounds[1], true)] : [0, 0]
-  const current: [number, number] = [search.minPrice ? toCents(search.minPrice) : min, search.maxPrice ? toCents(search.maxPrice, true) : max]
-  const [v, setV] = useState(current) // remounted (key) when the URL range changes
-  if (!bounds) return <Skeleton className="h-24 w-full" />
-  return (
-    <div className="space-y-3">
-      <Slider
-        min={min}
-        max={max}
-        step={1}
-        minStepsBetweenThumbs={1}
-        value={v}
-        onValueChange={(x) => setV([x[0], x[1]])}
-        thumbLabels={['Preço mínimo', 'Preço máximo']}
-        valueText={(c) => `${fromCents(c)} ETH`}
-      />
-      <p className="text-xs" aria-live="polite">
-        Preço: {fromCents(v[0]).replace('.', ',')} - {fromCents(v[1]).replace('.', ',')} ETH
-      </p>
-      <Button size="sm" className="h-7 px-3" onClick={() => set({ minPrice: v[0] > min ? fromCents(v[0]) : undefined, maxPrice: v[1] < max ? fromCents(v[1]) : undefined })}>
-        Aplicar
-      </Button>
-    </div>
-  )
-}
-
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <fieldset className="mt-6 first:mt-0">
-      <legend className="text-base font-bold">{title}</legend>
-      <div className="mt-3 space-y-0.5">{children}</div>
-    </fieldset>
-  )
-}
-
-function Item({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={cn('flex w-full items-center justify-between rounded-xs px-3 py-2 text-left text-sm transition hover:bg-accent/60', active ? 'text-primary' : 'text-sand')}
-    >
-      <span>{label}</span>
-      <span className="font-semibold tabular-nums">({count ?? '–'})</span>
-    </button>
-  )
-}
-
-export function Filters({ search, facets, set }: { search: HomeSearch; facets?: NftList['facets']; set: Set }) {
-  return (
-    <>
-      <Group title="Coleções">
-        {Category.options.map((c) => (
-          <Item key={c} label={CATEGORY_LABEL[c]} count={facets?.categories[c]} active={search.category === c} onClick={() => set({ category: search.category === c ? undefined : c })} />
-        ))}
-      </Group>
-      <Group title="Faixa de preço">
-        <div className="px-1 pt-1">
-          <PriceRange key={`${search.minPrice}-${search.maxPrice}-${facets?.priceRange}`} search={search} bounds={facets?.priceRange} set={set} />
-        </div>
-      </Group>
-      <Group title="Rede">
-        {Network.options.map((n) => (
-          <Item key={n} label={NETWORK_LABEL[n]} count={facets?.networks[n]} active={search.network === n} onClick={() => set({ network: search.network === n ? undefined : n })} />
-        ))}
-      </Group>
-    </>
-  )
-}
-
-function SortSelect({ value, set, className }: { value: Sort; set: Set; className?: string }) {
-  return (
-    <Select value={value} onValueChange={(s) => set({ sort: s === 'recent' ? undefined : (s as Sort) })}>
-      <SelectTrigger aria-label="Ordenar por" className={cn('h-8 gap-1 border-0 bg-transparent px-0 text-sm shadow-none', className)}>
-        <span className="text-muted-foreground">Ordenar por:</span>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent align="end" className="bg-card">
-        {Sort.options.map((s) => (
-          <SelectItem key={s} value={s}>{SORT_LABEL[s]}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
 }
 
 function Featured() {
@@ -190,6 +96,8 @@ export function MobileSearchBar({ search }: { search: HomeSearch }) {
   const set = useSetSearch()
   const [q, setQ] = useState(search.q ?? '')
   const [open, setOpen] = useState(false)
+  const [armed, setArmed] = useState(false) // the drawer mounts on first use
+  const trigger = useRef<HTMLButtonElement>(null)
   const facets = useQuery(nftListQuery(toListParams(search))).data?.facets
   // Follow URL changes (history navigation) without an effect.
   const [urlQ, setUrlQ] = useState(search.q)
@@ -217,24 +125,24 @@ export function MobileSearchBar({ search }: { search: HomeSearch }) {
           className="h-11 w-full rounded-xl bg-card pr-3 pl-9 text-sm placeholder:text-sand/80"
         />
       </div>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <button type="button" aria-label="Filtros e ordenação" className="grid size-11 place-items-center rounded-xl bg-linear-to-b from-[#d9935a] to-[#b8743f] text-primary-foreground">
-            <SlidersHorizontal className="size-5" />
-          </button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-card px-4 pb-8">
-          <SheetHeader className="px-0">
-            <SheetTitle>Filtros</SheetTitle>
-            <SheetDescription>Combine coleção, faixa de preço e rede.</SheetDescription>
-          </SheetHeader>
-          <SortSelect value={search.sort ?? 'recent'} set={set} className="mb-2" />
-          <Filters search={search} facets={facets} set={set} />
-          <Button className="mt-6 w-full" onClick={() => setOpen(false)}>
-            Ver resultados
-          </Button>
-        </SheetContent>
-      </Sheet>
+      <button
+        ref={trigger}
+        type="button"
+        aria-label="Filtros e ordenação"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onPointerDown={loadControls}
+        onFocus={loadControls}
+        onClick={() => (setArmed(true), setOpen(true))}
+        className="grid size-11 place-items-center rounded-xl bg-linear-to-b from-[#d9935a] to-[#b8743f] text-primary-foreground"
+      >
+        <SlidersHorizontal className="size-5" />
+      </button>
+      {armed && (
+        <Suspense fallback={null}>
+          <FiltersSheet open={open} onOpenChange={setOpen} trigger={trigger} search={search} facets={facets} set={set} />
+        </Suspense>
+      )}
     </div>
   )
 }
@@ -259,7 +167,9 @@ export function Catalog({ search }: { search: HomeSearch }) {
         {desktop && (
           <aside aria-label="Filtros">
             <div className="rounded-sm bg-card p-5">
-              <Filters search={search} facets={data?.facets} set={set} />
+              <Suspense fallback={<Skeleton className="h-[520px] w-full" />}>
+                <Filters search={search} facets={data?.facets} set={set} />
+              </Suspense>
             </div>
             <Featured />
           </aside>
@@ -279,7 +189,11 @@ export function Catalog({ search }: { search: HomeSearch }) {
                 </button>
               ))}
             </div>
-            <SortSelect value={params.sort} set={set} className="hidden md:flex" />
+            {desktop && (
+              <Suspense fallback={<div aria-hidden="true" className="h-8 w-[210px]" />}>
+                <SortSelect value={params.sort} set={set} />
+              </Suspense>
+            )}
           </div>
           <p className="sr-only" aria-live="polite">
             {data && !list.isFetching ? `${data.total} NFTs encontrados. Página ${data.page} de ${data.totalPages}.` : ''}

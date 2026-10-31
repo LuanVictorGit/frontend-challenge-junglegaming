@@ -44,7 +44,7 @@ export function Price({ value, compareAt, className }: { value: string; compareA
 
 const iconBtn = 'grid size-9 place-items-center rounded-full bg-background/85 text-foreground backdrop-blur transition hover:text-primary'
 
-export function NftCard({ nft, priority, index = 0, sizes = '(min-width: 768px) 258px, 45vw', className }: { nft: NftSummary; priority?: boolean; index?: number; sizes?: string; className?: string }) {
+export function NftCard({ nft, priority, index = 0, sizes = '(min-width: 768px) 258px, calc(50vw - 30px)', className }: { nft: NftSummary; priority?: boolean; index?: number; sizes?: string; className?: string }) {
   const fav = useFavoriteToggle(nft)
   const add = useAddToCart()
   const to = { to: '/nft/$id', params: { id: nft.id } } as const

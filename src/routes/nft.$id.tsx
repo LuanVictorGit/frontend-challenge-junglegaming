@@ -160,7 +160,7 @@ function Detail({ nft }: { nft: NftDetail }) {
             </ul>
             <div className="relative flex-1 overflow-hidden rounded-2xl md:rounded-sm md:bg-tile md:p-3">
               <div className="overflow-hidden rounded-2xl md:rounded-xl">
-                <NftImage image={nft.image} alt={`${nft.name} — ${VIEWS[view].label.toLowerCase()}`} sizes="(min-width: 768px) 480px, 100vw" priority style={VIEWS[view].style} className="transition-transform duration-300" />
+                <NftImage image={nft.image} alt={`${nft.name} — ${VIEWS[view].label.toLowerCase()}`} sizes="(min-width: 768px) 480px, calc(100vw - 48px)" priority style={VIEWS[view].style} className="transition-transform duration-300" />
               </div>
               <button ref={zoomBtn} type="button" onClick={() => setZoom(true)} aria-label="Ampliar imagem" className="absolute top-5 right-5 hidden size-8 place-items-center rounded-full bg-background/80 md:grid">
                 <ZoomIn className="size-4" />

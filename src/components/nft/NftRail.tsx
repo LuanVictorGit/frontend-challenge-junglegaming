@@ -29,7 +29,7 @@ export function NftRail({ title, items, loading }: { title: string; items?: NftS
             ))
           : items!.map((n) => (
               <li key={n.id} className="snap-start">
-                <NftCard nft={n} index={3} sizes="(min-width: 768px) 220px, 45vw" />
+                <NftCard nft={n} index={3} sizes="(min-width: 768px) 220px, calc(45vw - 22px)" />
               </li>
             ))}
       </ul>
