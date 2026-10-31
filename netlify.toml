@@ -5,6 +5,12 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# A missing build asset (e.g. a tab opened before a deploy) is a 404, never the HTML fallback below.
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
 # SPA fallback: direct access/refresh on any route serves index.html (existing files win).
 [[redirects]]
   from = "/*"

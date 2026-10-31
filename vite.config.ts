@@ -7,6 +7,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 const src = (p = '') => fileURLToPath(new URL(`./src${p}`, import.meta.url))
 
 // Inline the (single) stylesheet into index.html: no render-blocking CSS request on first paint.
+// The file is still emitted: Vite lists the entry CSS among the preload deps of some lazy chunks.
 const inlineCss = (): Plugin => ({
   name: 'kurio:inline-css',
   apply: 'build',
@@ -17,10 +18,7 @@ const inlineCss = (): Plugin => ({
     let source = String(html.source)
     for (const [file, asset] of Object.entries(bundle)) {
       if (asset.type !== 'asset' || !file.endsWith('.css')) continue
-      const link = new RegExp(`<link rel="stylesheet"[^>]*href="/${file}"[^>]*>`)
-      if (!link.test(source)) continue
-      source = source.replace(link, () => `<style>${asset.source}</style>`)
-      delete bundle[file]
+      source = source.replace(new RegExp(`<link rel="stylesheet"[^>]*href="/${file}"[^>]*>`), () => `<style>${asset.source}</style>`)
     }
     html.source = source
   },
@@ -54,4 +52,6 @@ export default defineConfig({
     ],
   },
   build: { sourcemap: true },
+  // Same strict MIME checks as production (netlify.toml), so E2E catches assets served with the wrong type.
+  preview: { headers: { 'X-Content-Type-Options': 'nosniff' } },
 })

@@ -15,6 +15,14 @@ if (mocksEnabled)
 // Without mocks, drop a mock worker left by a previous build: a controlled page must always have its MSW client.
 else navigator.serviceWorker?.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()))
 
+// A tab opened before a deploy may ask for chunks that no longer exist: reload once to pick up the new build.
+addEventListener('vite:preloadError', (e) => {
+  if (Date.now() - Number(sessionStorage.getItem('kurio:reloaded') ?? 0) < 10_000) return // the asset is really gone
+  sessionStorage.setItem('kurio:reloaded', String(Date.now()))
+  e.preventDefault()
+  location.reload()
+})
+
 // Transition: the initial render is time-sliced (no single long task blocking the main thread).
 const root = createRoot(document.getElementById('root')!)
 startTransition(() =>

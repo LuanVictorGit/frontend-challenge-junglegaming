@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { boot } from './utils'
+import { boot, isMobile } from './utils'
 
 test.beforeEach(({ page }) => boot(page))
 
@@ -16,6 +16,15 @@ test('direct access renders the NFT with editions, sold-out edition and quantity
   await plus.click()
   await expect(plus).toBeDisabled()
   await expect(page.getByRole('group', { name: 'Cosmic Bloom #118' }).locator('output')).toHaveText('3')
+  // Gallery zoom (desktop): the dialog loads on demand, closes with Escape and returns focus
+  if (!isMobile(page)) {
+    const zoom = page.getByRole('button', { name: 'Ampliar imagem' })
+    await zoom.click()
+    await expect(page.getByRole('dialog', { name: 'Cosmic Bloom #118' })).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toBeHidden()
+    await expect(zoom).toBeFocused()
+  }
 })
 
 test('unknown NFT and unknown route show not-found states', async ({ page }) => {
